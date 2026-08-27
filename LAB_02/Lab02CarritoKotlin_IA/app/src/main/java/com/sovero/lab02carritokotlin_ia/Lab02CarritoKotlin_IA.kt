@@ -59,7 +59,7 @@ class Carrito(val nombreCliente: String) {
 
     fun mostrarResumenFinal() {
         if (estaVacio()) {
-            println(">> No compraste nada.")
+            println(">> No has comprado nada aun.")
             return
         }
         println()
@@ -85,7 +85,7 @@ class Carrito(val nombreCliente: String) {
 }
 
 fun main() {
-    val catalogo = listOf(
+    val catalogo = mutableListOf(
         Producto("Laptop HP", 2500.0, 0),
         Producto("Mouse Logitech", 45.5, 0),
         Producto("Teclado Genius", 80.0, 0),
@@ -106,9 +106,10 @@ fun main() {
         println()
         println("============= MENU =============")
         println("1. Ver catalogo y comprar")
-        println("2. Ver mi carrito")
-        println("3. Finalizar compra")
-        println("4. Salir sin comprar")
+        println("2. Agregar nuevo producto al catalogo")
+        println("3. Ver mi carrito")
+        println("4. Finalizar compra")
+        println("5. Salir")
         print("Elija una opcion: ")
         opcion = readLine()?.toIntOrNull() ?: 0
 
@@ -135,16 +136,22 @@ fun main() {
                     println(">> Producto no valido.")
                 }
             }
-            2 -> carrito.mostrarDetalle()
-            3 -> {
-                carrito.mostrarResumenFinal()
-                if (!carrito.estaVacio()) {
-                    println(">> Compra realizada con exito. Gracias $nombreCliente!")
-                    opcion = 4
+            2 -> {
+                print("Nombre del nuevo producto: ")
+                val nombre = readLine() ?: ""
+                print("Precio: ")
+                val precio = readLine()?.toDoubleOrNull() ?: 0.0
+                if (nombre.isNotBlank() && precio > 0) {
+                    catalogo.add(Producto(nombre, precio, 0))
+                    println(">> Producto '$nombre' agregado al catalogo.")
+                } else {
+                    println(">> Datos invalidos.")
                 }
             }
-            4 -> println("Saliendo del sistema. Hasta luego!")
+            3 -> carrito.mostrarDetalle()
+            4 -> carrito.mostrarResumenFinal()
+            5 -> println("Saliendo del sistema. Hasta luego!")
             else -> println(">> Opcion invalida.")
         }
-    } while (opcion != 4)
+    } while (opcion != 5)
 }
