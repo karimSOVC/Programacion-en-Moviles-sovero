@@ -15,45 +15,136 @@ class Carrito(val nombreCliente: String) {
 
     fun agregar(producto: Producto) {
         productos.add(producto)
-        println("Producto agregado: ${producto.nombre}")
+        println(">> '${producto.nombre}' x${producto.cantidad} agregado al carrito.")
     }
 
-    fun cantidad(): Int {
-        return productos.size
-    }
+    fun estaVacio(): Boolean = productos.isEmpty()
+
+    fun cantidad(): Int = productos.size
 
     fun calcularSubtotal(): Double {
         var subtotal = 0.0
-        for (p in productos) {
-            subtotal += p.importe()
-        }
+        for (p in productos) subtotal += p.importe()
         return subtotal
     }
 
-    fun calcularIGV(): Double {
-        return calcularSubtotal() * 0.18
+    fun calcularIGV(): Double = calcularSubtotal() * 0.18
+
+    fun calcularTotal(): Double = calcularSubtotal() + calcularIGV()
+
+    fun calcularDescuento(): Double {
+        val total = calcularTotal()
+        return when {
+            total > 5000 -> total * 0.10
+            total > 3000 -> total * 0.05
+            else -> 0.0
+        }
     }
 
-    fun calcularTotal(): Double {
-        return calcularSubtotal() + calcularIGV()
+    fun productoMasCaro(): Producto? = productos.maxByOrNull { it.precio }
+
+    fun mostrarDetalle() {
+        if (estaVacio()) {
+            println(">> El carrito esta vacio.")
+            return
+        }
+        println("---------- DETALLE DEL CARRITO ----------")
+        var i = 1
+        for (p in productos) {
+            println(String.format("%d. %-20s x%d S/ %8.2f", i, p.nombre, p.cantidad, p.importe()))
+            i++
+        }
+        println("-----------------------------------------")
+    }
+
+    fun mostrarResumenFinal() {
+        if (estaVacio()) {
+            println(">> No compraste nada.")
+            return
+        }
+        println()
+        println("========== RESUMEN DE COMPRA ==========")
+        mostrarDetalle()
+        println("Cantidad de productos: ${cantidad()}")
+        val subtotal = calcularSubtotal()
+        val igv = calcularIGV()
+        val total = calcularTotal()
+        val descuento = calcularDescuento()
+        println(String.format("Subtotal           : S/ %8.2f", subtotal))
+        println(String.format("IGV (18%%)          : S/ %8.2f", igv))
+        println(String.format("TOTAL A PAGAR      : S/ %8.2f", total))
+        val masCaro = productoMasCaro()
+        if (masCaro != null) {
+            println("Producto mas caro  : ${masCaro.nombre} " +
+                    String.format("(S/ %.2f)", masCaro.precio))
+        }
+        println(String.format("Descuento aplicado : S/ %8.2f", descuento))
+        println(String.format("TOTAL CON DESCUENTO: S/ %8.2f", total - descuento))
+        println("=======================================")
     }
 }
 
 fun main() {
+    val catalogo = listOf(
+        Producto("Laptop HP", 2500.0, 0),
+        Producto("Mouse Logitech", 45.5, 0),
+        Producto("Teclado Genius", 80.0, 0),
+        Producto("Monitor Samsung", 900.0, 0),
+        Producto("Audifonos Sony", 350.0, 0)
+    )
+
     println("========================================")
     println("   CARRITO DE COMPRAS - TIENDA TECSUP   ")
     println("========================================")
-    val carrito = Carrito("Juan Leon")
-    println("Cliente: ${carrito.nombreCliente}")
-    println()
-    carrito.agregar(Producto("Laptop HP", 2500.0, 1))
-    carrito.agregar(Producto("Mouse Logitech", 45.5, 2))
-    carrito.agregar(Producto("Teclado Genius", 80.0, 3))
-    carrito.agregar(Producto("Monitor Samsung", 900.0, 1))
-    println()
-    println("Cantidad de productos: ${carrito.cantidad()}")
-    println()
-    println(String.format("Subtotal    : S/ %8.2f", carrito.calcularSubtotal()))
-    println(String.format("IGV (18%%)   : S/ %8.2f", carrito.calcularIGV()))
-    println(String.format("TOTAL A PAGAR: S/ %8.2f", carrito.calcularTotal()))
+    print("Ingrese el nombre del cliente: ")
+    val nombreCliente = readLine() ?: "Cliente"
+    val carrito = Carrito(nombreCliente)
+    println("Bienvenido, $nombreCliente!")
+
+    var opcion: Int
+    do {
+        println()
+        println("============= MENU =============")
+        println("1. Ver catalogo y comprar")
+        println("2. Ver mi carrito")
+        println("3. Finalizar compra")
+        println("4. Salir sin comprar")
+        print("Elija una opcion: ")
+        opcion = readLine()?.toIntOrNull() ?: 0
+
+        when (opcion) {
+            1 -> {
+                println()
+                println("---------- CATALOGO ----------")
+                for ((index, p) in catalogo.withIndex()) {
+                    println(String.format("%d. %-20s S/ %8.2f", index + 1, p.nombre, p.precio))
+                }
+                println("------------------------------")
+                print("Numero del producto a comprar: ")
+                val num = readLine()?.toIntOrNull() ?: 0
+                if (num in 1..catalogo.size) {
+                    val seleccionado = catalogo[num - 1]
+                    print("Cuantas unidades? ")
+                    val cant = readLine()?.toIntOrNull() ?: 1
+                    if (cant > 0) {
+                        carrito.agregar(Producto(seleccionado.nombre, seleccionado.precio, cant))
+                    } else {
+                        println(">> Cantidad invalida.")
+                    }
+                } else {
+                    println(">> Producto no valido.")
+                }
+            }
+            2 -> carrito.mostrarDetalle()
+            3 -> {
+                carrito.mostrarResumenFinal()
+                if (!carrito.estaVacio()) {
+                    println(">> Compra realizada con exito. Gracias $nombreCliente!")
+                    opcion = 4
+                }
+            }
+            4 -> println("Saliendo del sistema. Hasta luego!")
+            else -> println(">> Opcion invalida.")
+        }
+    } while (opcion != 4)
 }
