@@ -15,7 +15,7 @@ class Carrito(val nombreCliente: String) {
 
     fun agregar(producto: Producto) {
         productos.add(producto)
-        println(">> '${producto.nombre}' x${producto.cantidad} agregado al carrito.")
+        println(">> '${producto.nombre}' x${producto.cantidad} agregado al carrito")
     }
 
     fun estaVacio(): Boolean = productos.isEmpty()
@@ -59,7 +59,7 @@ class Carrito(val nombreCliente: String) {
 
     fun mostrarResumenFinal() {
         if (estaVacio()) {
-            println(">> No has comprado nada aun.")
+            println(">> No has comprado nada aun")
             return
         }
         println()
