@@ -6,7 +6,7 @@ import java.time.temporal.ChronoUnit
 
 data class Prestamo(
     val titulo: String,
-    val tipoUsuario: String, // "Alumno" o "Maestro"
+    val tipoUsuario: String,
     val fechaPrestamo: LocalDate,
     val fechaEntrega: LocalDate,
     val fechaDevolucion: LocalDate
