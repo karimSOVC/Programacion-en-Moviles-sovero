@@ -26,6 +26,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import com.sovero.lab03registroproducto.ui.theme.Lab03RegistroProductoTheme
 
@@ -105,7 +106,11 @@ fun PantallaRegistro(modifier: Modifier = Modifier) {
                 colors = CardDefaults.cardColors(
                     containerColor = MaterialTheme.colorScheme.primaryContainer
                 )
-            ) {
+
+            )
+
+
+            {
                 Column(modifier = Modifier.padding(16.dp)) {
                     Text(nombre, style = MaterialTheme.typography.titleLarge)
                     Text("Precio: S/ " + String.format("%.2f", precioNum))
@@ -117,6 +122,10 @@ fun PantallaRegistro(modifier: Modifier = Modifier) {
                     )
                 }
             }
+            Text(
+                "✓ Producto registrado correctamente",
+                color = Color(0xFF2E7D32)
+            )
         }
 
     }
