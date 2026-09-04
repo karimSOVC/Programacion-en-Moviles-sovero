@@ -13,6 +13,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -26,8 +28,11 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.sovero.lab03registronotas.ui.theme.Lab03RegistroNotasTheme
+import kotlin.math.roundToInt
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -104,6 +109,54 @@ fun PantallaNotas(modifier: Modifier = Modifier) {
             Text("CALCULAR PROMEDIO")
         }
         Spacer(modifier = Modifier.height(16.dp))
+        if (mostrarResultado) {
+            val ponderado = notaFundamentos * 0.20 + notaPoo * 0.25 +
+                    notaMoviles * 0.30 + notaBaseDatos * 0.25
+            val promedioFinal = if (redondear) ponderado.roundToInt().toDouble() else ponderado
+            val observacion = when {
+                promedioFinal >= 17 -> "EXCELENTE"
+                promedioFinal >= 13 -> "APROBADO"
+                promedioFinal >= 10 -> "EN RECUPERACIÓN"
+                else -> "DESAPROBADO"
+            }
+            val colorChip = when {
+                promedioFinal >= 17 -> Color(0xFF1B5E20)
+                promedioFinal >= 13 -> Color(0xFF4CAF50)
+                promedioFinal >= 10 -> Color(0xFFFFB300)
+                else -> Color(0xFFD32F2F)
+            }
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                colors = CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.primaryContainer
+                )
+            ) {
+                Column(modifier = Modifier.padding(16.dp)) {
+                    Text("Promedio ponderado: " + String.format("%.2f", ponderado))
+                    Text(
+                        "Promedio final: " + String.format("%.2f", promedioFinal) +
+                                if (redondear) " (redondeado)" else "",
+                        fontWeight = FontWeight.Bold
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text(
+                        text = observacion,
+                        color = colorChip,
+                        fontWeight = FontWeight.Bold
+                    )
+                }
+            }
+            Spacer(modifier = Modifier.height(16.dp))
+            Text(
+                "✓ Promedio calculado correctamente",
+                color = Color(0xFF2E7D32)
+            )
+        } else {
+            Text(
+                "Asigna las notas y confirma para calcular",
+                color = MaterialTheme.colorScheme.outline
+            )
+        }
     }
 }
 
