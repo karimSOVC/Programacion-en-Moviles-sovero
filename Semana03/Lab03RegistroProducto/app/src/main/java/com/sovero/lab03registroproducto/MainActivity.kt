@@ -53,6 +53,8 @@ fun PantallaRegistro(modifier: Modifier = Modifier) {
     var precio by remember { mutableStateOf("") }
     var cantidad by remember { mutableStateOf("") }
     var mostrarResumen by remember { mutableStateOf(false) }
+    var errorMensaje by remember { mutableStateOf("") }
+
     Column(
         modifier = modifier
             .fillMaxSize()
@@ -91,13 +93,49 @@ fun PantallaRegistro(modifier: Modifier = Modifier) {
             )
         }
         Spacer(modifier = Modifier.height(24.dp))
-        Button(onClick = { mostrarResumen = true },
+
+        // Botón Agregar con Validación
+        Button(
+            onClick = {
+                if (nombre.isBlank() || precio.isBlank() || cantidad.isBlank()) {
+                    errorMensaje = "Error: Todos los campos son obligatorios"
+                    mostrarResumen = false
+                } else {
+                    errorMensaje = ""
+                    mostrarResumen = true
+                }
+            },
             modifier = Modifier.fillMaxWidth()
         ) {
             Text("AGREGAR PRODUCTO")
         }
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        // Botón Limpiar
+        Button(
+            onClick = {
+                nombre = ""
+                precio = ""
+                cantidad = ""
+                mostrarResumen = false
+                errorMensaje = ""
+            },
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text("LIMPIAR")
+        }
+
         Spacer(modifier = Modifier.height(24.dp))
-        if (mostrarResumen) {
+
+        // Mostrar Error o Card de Resumen
+        if (errorMensaje.isNotEmpty()) {
+            Text(
+                text = errorMensaje,
+                color = Color.Red,
+                fontWeight = FontWeight.Bold
+            )
+        } else if (mostrarResumen) {
             val precioNum = precio.toDoubleOrNull() ?: 0.0
             val cantidadNum = cantidad.toIntOrNull() ?: 0
             val importe = precioNum * cantidadNum
@@ -106,17 +144,13 @@ fun PantallaRegistro(modifier: Modifier = Modifier) {
                 colors = CardDefaults.cardColors(
                     containerColor = MaterialTheme.colorScheme.primaryContainer
                 )
-
-            )
-
-
-            {
+            ) {
                 Column(modifier = Modifier.padding(16.dp)) {
                     Text(nombre, style = MaterialTheme.typography.titleLarge)
                     Text("Precio: S/ " + String.format("%.2f", precioNum))
                     Text("Cantidad: " + cantidadNum)
                     Text(
-                        "Importe: S/ " + String.format("%.2f", importe),
+                           "Importe: S/ " + String.format("%.2f", importe),
                         fontWeight = FontWeight.Bold,
                         color = MaterialTheme.colorScheme.primary
                     )
@@ -127,6 +161,5 @@ fun PantallaRegistro(modifier: Modifier = Modifier) {
                 color = Color(0xFF2E7D32)
             )
         }
-
     }
 }
