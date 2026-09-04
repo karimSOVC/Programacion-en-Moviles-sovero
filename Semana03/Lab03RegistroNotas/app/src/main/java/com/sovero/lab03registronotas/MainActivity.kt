@@ -33,8 +33,8 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import com.sovero.lab03registronotas.ui.theme.Lab03RegistroNotasTheme
 import kotlin.math.roundToInt
+import com.sovero.lab03registronotas.ui.theme.Lab03RegistroNotasTheme
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -77,10 +77,26 @@ fun PantallaNotas(modifier: Modifier = Modifier) {
     ) {
         Text(
             text = "Registro de Notas",
-            style = MaterialTheme.typography.headlineSmall,
-            color = MaterialTheme.colorScheme.primary
+            style = MaterialTheme.typography.titleLarge,
+            fontWeight = FontWeight.Bold,
+            color = MaterialTheme.colorScheme.onPrimary,
+            modifier = Modifier
+                .fillMaxWidth()
+                .background(MaterialTheme.colorScheme.primary)
+                .padding(16.dp)
         )
-        Spacer(modifier = Modifier.height(24.dp))
+        Spacer(modifier = Modifier.height(16.dp))
+        Text(
+            text = "Notas del ciclo",
+            style = MaterialTheme.typography.titleMedium,
+            fontWeight = FontWeight.Bold
+        )
+        Text(
+            text = "Desliza para asignar cada nota (0 a 20)",
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.outline
+        )
+        Spacer(modifier = Modifier.height(16.dp))
         FilaCurso("Fundamentos de Programación", "20%", notaFundamentos) { notaFundamentos = it }
         Spacer(modifier = Modifier.height(16.dp))
         FilaCurso("Programación Orientada a Objetos", "25%", notaPoo) { notaPoo = it }
