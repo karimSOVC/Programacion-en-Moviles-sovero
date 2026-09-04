@@ -156,7 +156,14 @@ fun PantallaNotas(modifier: Modifier = Modifier) {
                 "Asigna las notas y confirma para calcular",
                 color = MaterialTheme.colorScheme.outline
             )
+
         }
+        Spacer(modifier = Modifier.height(16.dp))
+        Text(
+            text = "Desarrollado por: Karim Sovero",
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.outline
+        )
     }
 }
 
@@ -188,5 +195,6 @@ fun FilaCurso(
             valueRange = 0f..20f,
             steps = 19
         )
+
     }
 }
