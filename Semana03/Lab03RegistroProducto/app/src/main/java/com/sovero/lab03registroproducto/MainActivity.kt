@@ -54,6 +54,9 @@ fun PantallaRegistro(modifier: Modifier = Modifier) {
     var cantidad by remember { mutableStateOf("") }
     var mostrarResumen by remember { mutableStateOf(false) }
     var errorMensaje by remember { mutableStateOf("") }
+    var nombreGuardado by remember { mutableStateOf("") }
+    var precioGuardado by remember { mutableStateOf(0.0) }
+    var cantidadGuardada by remember { mutableStateOf(0) }
 
     Column(
         modifier = modifier
@@ -80,14 +83,14 @@ fun PantallaRegistro(modifier: Modifier = Modifier) {
         Row(modifier = Modifier.fillMaxWidth()) {
             OutlinedTextField(
                 value = precio,
-                onValueChange = { precio = it },
+                onValueChange = { if (it.all { c -> c.isDigit() || c == '.' }) precio = it },
                 label = { Text("Precio (S/)") },
                 modifier = Modifier.weight(1f)
             )
             Spacer(modifier = Modifier.width(16.dp))
             OutlinedTextField(
                 value = cantidad,
-                onValueChange = { cantidad = it },
+                onValueChange = { if (it.all { c -> c.isDigit() }) cantidad = it },
                 label = { Text("Cantidad") },
                 modifier = Modifier.weight(1f)
             )
@@ -102,6 +105,9 @@ fun PantallaRegistro(modifier: Modifier = Modifier) {
                     mostrarResumen = false
                 } else {
                     errorMensaje = ""
+                    nombreGuardado = nombre
+                    precioGuardado = precio.toDoubleOrNull() ?: 0.0
+                    cantidadGuardada = cantidad.toIntOrNull() ?: 0
                     mostrarResumen = true
                 }
             },
@@ -110,7 +116,7 @@ fun PantallaRegistro(modifier: Modifier = Modifier) {
             Text("AGREGAR PRODUCTO")
         }
 
-        Spacer(modifier = Modifier.height(8.dp))
+        Spacer(modifier = Modifier.height(16.dp))
 
         // Botón Limpiar
         Button(
@@ -136,9 +142,7 @@ fun PantallaRegistro(modifier: Modifier = Modifier) {
                 fontWeight = FontWeight.Bold
             )
         } else if (mostrarResumen) {
-            val precioNum = precio.toDoubleOrNull() ?: 0.0
-            val cantidadNum = cantidad.toIntOrNull() ?: 0
-            val importe = precioNum * cantidadNum
+            val importe = precioGuardado * cantidadGuardada
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 colors = CardDefaults.cardColors(
@@ -146,11 +150,11 @@ fun PantallaRegistro(modifier: Modifier = Modifier) {
                 )
             ) {
                 Column(modifier = Modifier.padding(16.dp)) {
-                    Text(nombre, style = MaterialTheme.typography.titleLarge)
-                    Text("Precio: S/ " + String.format("%.2f", precioNum))
-                    Text("Cantidad: " + cantidadNum)
+                    Text(nombreGuardado, style = MaterialTheme.typography.titleLarge)
+                    Text("Precio: S/ " + String.format("%.2f", precioGuardado))
+                    Text("Cantidad: " + cantidadGuardada)
                     Text(
-                           "Importe: S/ " + String.format("%.2f", importe),
+                        "Importe: S/ " + String.format("%.2f", importe),
                         fontWeight = FontWeight.Bold,
                         color = MaterialTheme.colorScheme.primary
                     )
