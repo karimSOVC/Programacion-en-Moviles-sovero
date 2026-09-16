@@ -16,13 +16,12 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.tecsup.listatareas.ui.theme.ListaTareasTheme
 
-
-
 data class Tarea(
     val id: Int,
     val nombre: String,
     val completada: Boolean = false
 )
+
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -155,5 +154,32 @@ fun PantallaTareas() {
             text = "Total de tareas: ${listaTareas.size}",
             style = MaterialTheme.typography.titleMedium
         )
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        LazyColumn {
+            items(listaTareas, key = { it.id }) { tarea ->
+                ItemTarea(
+                    tarea = tarea,
+                    onEliminar = {
+                        listaTareas.remove(tarea)
+                    },
+                    onCambiarEstado = { completada ->
+                        val index = listaTareas.indexOf(tarea)
+                        if (index != -1) {
+                            listaTareas[index] = listaTareas[index].copy(completada = completada)
+                        }
+                    }
+                )
+            }
+        }
+    }
+}
+
+@Preview(showBackground = true)
+@Composable
+fun PreviewPantallaTareas() {
+    ListaTareasTheme {
+        PantallaTareas()
     }
 }
