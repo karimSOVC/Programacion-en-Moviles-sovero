@@ -29,11 +29,7 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             ListaTareasTheme {
-                ItemTarea(
-                    tarea = Tarea(id = 1, nombre = "Tarea de prueba", completada = false),
-                    onEliminar = {},
-                    onCambiarEstado = {}
-                )
+                PantallaTareas()
             }
         }
     }
@@ -104,6 +100,60 @@ fun ItemTareaPreview() {
             tarea = Tarea(id = 1, nombre = "Tarea de ejemplo", completada = false),
             onEliminar = {},
             onCambiarEstado = {}
+        )
+    }
+}
+
+@Composable
+fun PantallaTareas() {
+    var textoTarea by remember { mutableStateOf("") }
+    var contadorId by remember { mutableStateOf(1) }
+    val listaTareas = remember { mutableStateListOf<Tarea>() }
+
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(16.dp)
+    ) {
+        Text(
+            text = "Lista de tareas",
+            style = MaterialTheme.typography.headlineMedium
+        )
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        OutlinedTextField(
+            value = textoTarea,
+            onValueChange = { textoTarea = it },
+            label = { Text("Ingrese una tarea") },
+            modifier = Modifier.fillMaxWidth()
+        )
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        Button(
+            onClick = {
+                if (textoTarea.isNotBlank()) {
+                    listaTareas.add(
+                        Tarea(
+                            id = contadorId,
+                            nombre = textoTarea
+                        )
+                    )
+                    contadorId++
+                    textoTarea = ""
+                }
+            },
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text("Agregar tarea")
+        }
+
+        Spacer(modifier = Modifier.height(16.dp))
+
+        Text(
+            text = "Total de tareas: ${listaTareas.size}",
+            style = MaterialTheme.typography.titleMedium
         )
     }
 }
