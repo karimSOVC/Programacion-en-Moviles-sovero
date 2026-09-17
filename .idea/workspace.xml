@@ -5,7 +5,14 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="41dcdb13-0e80-4119-88a9-68fa5a78a914" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/Semana04/Tarea1/app/src/main/java/com/tecsup/tarea1/MainActivity.kt" beforeDir="false" afterPath="$PROJECT_DIR$/Semana04/Tarea1/app/src/main/java/com/tecsup/tarea1/MainActivity.kt" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Semana04/CarritoTecsup/.idea/.gitignore" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Semana04/CarritoTecsup/.idea/AndroidProjectSystem.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Semana04/CarritoTecsup/.idea/compiler.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Semana04/CarritoTecsup/.idea/deploymentTargetSelector.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Semana04/CarritoTecsup/.idea/gradle.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Semana04/CarritoTecsup/.idea/misc.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Semana04/CarritoTecsup/.idea/runConfigurations.xml" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Semana04/CarritoTecsup/.idea/vcs.xml" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -18,10 +25,16 @@
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
-  <component name="ProjectColorInfo"><![CDATA[{
-  "associatedIndex": 8,
-  "fromUser": false
+  <component name="GithubPullRequestsUISettings"><![CDATA[{
+  "selectedUrlAndAccountId": {
+    "url": "https://karimSOVC@github.com/karimSOVC/Programacion-en-Moviles-sovero.git",
+    "accountId": "963a3368-f09e-4084-bc2d-c4fafd44b7e0"
+  }
 }]]></component>
+  <component name="ProjectColorInfo">{
+  &quot;associatedIndex&quot;: 8,
+  &quot;fromUser&quot;: false
+}</component>
   <component name="ProjectId" id="3JR9GlqwjeuqOPQ8mZ0GfaMP9Ig" />
   <component name="ProjectViewState">
     <option name="hideEmptyMiddlePackages" value="true" />
@@ -40,6 +53,11 @@
     "git-widget-placeholder": "master",
     "kotlin-language-version-configured": "true",
     "last_opened_file_path": "C:/Users/USER/Programacion-en-Moviles-sovero"
+  },
+  "keyToStringList": {
+    "com.intellij.ide.scratch.ScratchImplUtil$2/New Scratch File": [
+      "TEXT"
+    ]
   }
 }]]></component>
   <component name="TaskManager">
