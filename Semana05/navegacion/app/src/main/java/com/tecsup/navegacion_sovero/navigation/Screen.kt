@@ -5,6 +5,9 @@ package com.tecsup.navegacion_sovero.navigation
 // Al ser sealed, el compilador conoce todas las rutas posibles en tiempo de compilación.
 sealed class Screen(val route: String) {
 
+    // Pantalla de inicio de sesión
+    object Login : Screen(route = "login")
+
     // Pantalla de inicio — punto de entrada de la app
     object Home : Screen(route = "home")
 

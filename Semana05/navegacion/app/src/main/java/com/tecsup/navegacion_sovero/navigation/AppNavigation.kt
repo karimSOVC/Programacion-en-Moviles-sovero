@@ -9,6 +9,7 @@ import androidx.navigation.navArgument
 import com.tecsup.navegacion_sovero.screens.DetailScreen
 import com.tecsup.navegacion_sovero.screens.HomeScreen
 import com.tecsup.navegacion_sovero.screens.ListScreen
+import com.tecsup.navegacion_sovero.screens.LoginScreen
 import com.tecsup.navegacion_sovero.screens.ProfileScreen
 
 @Composable
@@ -17,8 +18,11 @@ fun AppNavigation() {
 
     NavHost(
         navController = navController,
-        startDestination = Screen.Home.route
+        startDestination = Screen.Login.route
     ) {
+        composable(Screen.Login.route) {
+            LoginScreen(navController)
+        }
         composable(Screen.Home.route) {
             HomeScreen(navController)
         }
