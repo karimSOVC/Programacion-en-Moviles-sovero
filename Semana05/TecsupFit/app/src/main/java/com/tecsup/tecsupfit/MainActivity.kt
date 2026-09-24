@@ -35,7 +35,7 @@ class MainActivity : ComponentActivity() {
         setContent {
             TecsupFitTheme {
                 Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    PantallaInicio(modifier = Modifier.padding(innerPadding))
+                    AppNavigation(modifier = Modifier.padding(innerPadding))
                 }
             }
         }
@@ -43,7 +43,10 @@ class MainActivity : ComponentActivity() {
 }
 
 @Composable
-fun PantallaInicio(modifier: Modifier = Modifier) {
+fun PantallaInicio(
+    modifier: Modifier = Modifier,
+    onClaseClick: (ClaseGym) -> Unit = {}
+) {
     var filtroSeleccionado by remember { mutableStateOf("Hoy") }
     val filtros = listOf("Hoy", "Esta semana")
 
@@ -73,15 +76,21 @@ fun PantallaInicio(modifier: Modifier = Modifier) {
         // Lista de clases filtradas
         LazyColumn(verticalArrangement = Arrangement.spacedBy(8.dp)) {
             items(clasesFiltradas) { clase ->
-                TarjetaClase(clase = clase)
+                TarjetaClase(
+                    clase = clase,
+                    onClick = { onClaseClick(clase) }
+                )
             }
         }
     }
 }
 
 @Composable
-fun TarjetaClase(clase: ClaseGym) {
-    Card(modifier = Modifier.fillMaxWidth()) {
+fun TarjetaClase(clase: ClaseGym, onClick: () -> Unit = {}) {
+    Card(
+        onClick = onClick,
+        modifier = Modifier.fillMaxWidth()
+    ) {
         Column(modifier = Modifier.padding(16.dp)) {
             Text(
                 text = clase.nombre,
