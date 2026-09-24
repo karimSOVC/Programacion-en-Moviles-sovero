@@ -2,9 +2,9 @@ package com.tecsup.tecsupfit
 
 sealed class Screen(val route: String, val titulo: String) {
     object Inicio : Screen("inicio", "Inicio")
-    object Reservas : Screen("reservas", "Reservas")
+    object Reservas : Screen("reservas", "Mis reservas")
     object Rutinas : Screen("rutinas", "Rutinas")
-    object Perfil : Screen("perfil", "Perfil")
+    object Perfil : Screen("perfil", "Mi perfil")
 
     object Detalle : Screen("detalle/{claseId}", "Detalle de clase") {
         fun crearRuta(claseId: Int) = "detalle/$claseId"
