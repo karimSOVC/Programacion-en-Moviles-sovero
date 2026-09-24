@@ -35,7 +35,28 @@ fun AppNavigation(modifier: Modifier = Modifier) {
             val claseId = backStackEntry.arguments?.getInt("claseId") ?: 0
             PantallaDetalle(
                 claseId = claseId,
+                onReservar = { horarioIndex ->
+                    navController.navigate(Screen.Confirmacion.crearRuta(claseId, horarioIndex))
+                },
                 onVolver = { navController.popBackStack() }
+            )
+        }
+        composable(
+            route = Screen.Confirmacion.route,
+            arguments = listOf(
+                navArgument(name = "claseId") { type = NavType.IntType },
+                navArgument(name = "horarioIndex") { type = NavType.IntType }
+            )
+        ) { backStackEntry ->
+            val claseId = backStackEntry.arguments?.getInt("claseId") ?: 0
+            val horarioIndex = backStackEntry.arguments?.getInt("horarioIndex") ?: 0
+            PantallaConfirmacion(
+                claseId = claseId,
+                horarioIndex = horarioIndex,
+                onVerReservas = {
+                    // Por ahora vuelve a Inicio; en el commit 7 irá a la pantalla Reservas
+                    navController.popBackStack(Screen.Inicio.route, inclusive = false)
+                }
             )
         }
     }
