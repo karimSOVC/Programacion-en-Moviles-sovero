@@ -21,7 +21,6 @@ fun PantallaConfirmacion(
     onVerReservas: () -> Unit = {}
 ) {
     val clase = listaClases.find { it.id == claseId }
-    // getOrNull evita un error si la posición no existe en la lista
     val hora = clase?.horarioDisponibles?.getOrNull(horarioIndex)
 
     Column(

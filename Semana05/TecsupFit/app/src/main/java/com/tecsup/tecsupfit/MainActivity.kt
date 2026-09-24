@@ -6,7 +6,6 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
@@ -15,7 +14,6 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Card
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -34,9 +32,7 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             TecsupFitTheme {
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    AppNavigation(modifier = Modifier.padding(innerPadding))
-                }
+                AppNavigation()
             }
         }
     }
@@ -59,7 +55,6 @@ fun PantallaInicio(
             fontWeight = FontWeight.Bold
         )
 
-        // Fila de chips de filtro
         LazyRow(
             modifier = Modifier.padding(vertical = 12.dp),
             horizontalArrangement = Arrangement.spacedBy(8.dp)
@@ -73,7 +68,6 @@ fun PantallaInicio(
             }
         }
 
-        // Lista de clases filtradas
         LazyColumn(verticalArrangement = Arrangement.spacedBy(8.dp)) {
             items(clasesFiltradas) { clase ->
                 TarjetaClase(

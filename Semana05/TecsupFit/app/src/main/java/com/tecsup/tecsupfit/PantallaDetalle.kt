@@ -9,7 +9,6 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material3.Button
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -25,13 +24,10 @@ import com.tecsup.tecsupfit.ui.theme.TecsupFitTheme
 @Composable
 fun PantallaDetalle(
     claseId: Int,
-    onReservar: (horarioIndex: Int) -> Unit = {},
-    onVolver: () -> Unit = {}
+    onReservar: (horarioIndex: Int) -> Unit = {}
 ) {
-    // Busca en la lista la clase que tiene el id recibido por navegación
     val clase = listaClases.find { it.id == claseId }
 
-    // Posición del horario elegido; -1 significa que aún no se eligió ninguno
     var horarioSeleccionado by remember { mutableStateOf(-1) }
 
     Column(
@@ -51,7 +47,6 @@ fun PantallaDetalle(
 
             Text(text = "Elige un horario:", fontWeight = FontWeight.Bold)
 
-            // Selección única: solo un chip puede estar marcado a la vez
             LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                 itemsIndexed(clase.horarioDisponibles) { index, hora ->
                     FilterChip(
@@ -69,13 +64,6 @@ fun PantallaDetalle(
             ) {
                 Text(text = "Reservar cupo")
             }
-        }
-
-        OutlinedButton(
-            onClick = onVolver,
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Text(text = "Volver")
         }
     }
 }
