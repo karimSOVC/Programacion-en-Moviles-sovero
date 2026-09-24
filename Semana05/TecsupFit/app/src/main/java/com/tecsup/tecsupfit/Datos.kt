@@ -8,6 +8,12 @@ data class ClaseGym(
     val horarioDisponibles: List<String>
 )
 
+data class Reserva(
+    val clase: ClaseGym,
+    val hora: String,
+    val estado: String
+)
+
 val listaClases = listOf(
     ClaseGym(
         id = 1,

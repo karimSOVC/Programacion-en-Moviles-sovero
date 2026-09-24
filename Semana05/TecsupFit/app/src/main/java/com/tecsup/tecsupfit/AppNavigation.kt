@@ -18,6 +18,8 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.navigation.NavType
@@ -45,6 +47,12 @@ val todasLasPantallas = listOf(
 @Composable
 fun AppNavigation() {
     val navController = rememberNavController()
+
+    val reservas = remember {
+        mutableStateListOf(
+            Reserva(listaClases[1], "9:30 am", "Completada")
+        )
+    }
 
     val backStackEntry by navController.currentBackStackEntryAsState()
     val rutaActual = backStackEntry?.destination?.route
@@ -107,7 +115,7 @@ fun AppNavigation() {
                 )
             }
             composable(Screen.Reservas.route) {
-                PantallaReservas()
+                PantallaReservas(reservas = reservas)
             }
             composable(Screen.Rutinas.route) {
                 PantallaRutinas()
@@ -127,6 +135,13 @@ fun AppNavigation() {
                 PantallaDetalle(
                     claseId = claseId,
                     onReservar = { horarioIndex ->
+                        val clase = listaClases.find { it.id == claseId }
+                        if (clase != null) {
+                            reservas.add(
+                                0,
+                                Reserva(clase, clase.horarioDisponibles[horarioIndex], "Confirmada")
+                            )
+                        }
                         navController.navigate(Screen.Confirmacion.crearRuta(claseId, horarioIndex))
                     }
                 )
@@ -144,7 +159,10 @@ fun AppNavigation() {
                     claseId = claseId,
                     horarioIndex = horarioIndex,
                     onVerReservas = {
-                        navController.popBackStack(Screen.Inicio.route, inclusive = false)
+                        navController.navigate(Screen.Reservas.route) {
+                            popUpTo(Screen.Inicio.route)
+                            launchSingleTop = true
+                        }
                     }
                 )
             }
