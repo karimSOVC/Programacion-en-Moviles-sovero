@@ -23,9 +23,7 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             TecsupStoreSoveroTheme {
-                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-                    PantallaInicio(modifier = Modifier.padding(innerPadding))
-                }
+                AppNavegacion()
             }
         }
     }
