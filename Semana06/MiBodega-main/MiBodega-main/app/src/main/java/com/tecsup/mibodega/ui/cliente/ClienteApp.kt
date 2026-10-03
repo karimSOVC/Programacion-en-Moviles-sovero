@@ -10,13 +10,16 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
+import com.tecsup.mibodega.ui.cliente.modelo.COSTO_DELIVERY
 import com.tecsup.mibodega.ui.cliente.modelo.ItemCarrito
 import com.tecsup.mibodega.ui.cliente.modelo.Producto
 import com.tecsup.mibodega.ui.cliente.modelo.listaProductosFake
 import com.tecsup.mibodega.ui.cliente.screens.bienvenida.BienvenidaScreen
 import com.tecsup.mibodega.ui.cliente.screens.carrito.CarritoScreen
 import com.tecsup.mibodega.ui.cliente.screens.categorias.CategoriasScreen
+import com.tecsup.mibodega.ui.cliente.screens.confirmacion.ConfirmacionScreen
 import com.tecsup.mibodega.ui.cliente.screens.detalle.DetalleProductoScreen
+import com.tecsup.mibodega.ui.cliente.screens.entrega.DatosEntregaScreen
 import com.tecsup.mibodega.ui.cliente.screens.inicio.InicioScreen
 import com.tecsup.mibodega.ui.cliente.screens.login.LoginScreen
 import com.tecsup.mibodega.ui.cliente.screens.pedidos.PedidosScreen
@@ -37,6 +40,12 @@ fun ClienteApp() {
 
     // El carrito vive aquí arriba, no en ninguna Screen.
     var carrito by remember { mutableStateOf<List<ItemCarrito>>(emptyList()) }
+
+    // Resumen del último pedido confirmado, para mostrarlo en Confirmación
+    // (el carrito ya se vació cuando esa pantalla aparece).
+    var totalPedido by remember { mutableStateOf(0.0) }
+    var direccionPedido by remember { mutableStateOf("") }
+    var pagoPedido by remember { mutableStateOf("") }
 
     // Navegación del menú inferior (NavigationBar). Inicio queda siempre como
     // base de la pila: así no se acumulan pantallas al cambiar de sección y
@@ -162,7 +171,44 @@ fun ClienteApp() {
                 onEliminar = { producto ->
                     carrito = carrito.filterNot { it.producto.id == producto.id }
                 },
-                onContinuarPedido = { /* TODO: navegar a DatosEntregaScreen */ }
+                onContinuarPedido = { navController.navigate(Rutas.ENTREGA) }
+            )
+        }
+
+        composable(Rutas.ENTREGA) {
+            // remember: el total se calcula una vez al entrar. Así no cambia en
+            // pantalla cuando el carrito se vacía al confirmar el pedido.
+            val total = remember {
+                carrito.sumOf { it.producto.precio * it.cantidad } + COSTO_DELIVERY
+            }
+
+            DatosEntregaScreen(
+                total = total,
+                onVolver = { navController.popBackStack() },
+                onConfirmarPedido = { direccion, metodoPago ->
+                    totalPedido = total
+                    direccionPedido = direccion
+                    pagoPedido = metodoPago
+                    carrito = emptyList()
+
+                    // popUpTo(INICIO): saca Carrito y Datos de entrega de la pila.
+                    // Así, desde Confirmación el botón atrás lleva a Inicio y no
+                    // se puede regresar a un pedido que ya se confirmó.
+                    navController.navigate(Rutas.CONFIRMACION) {
+                        popUpTo(Rutas.INICIO)
+                    }
+                }
+            )
+        }
+
+        composable(Rutas.CONFIRMACION) {
+            ConfirmacionScreen(
+                total = totalPedido,
+                direccion = direccionPedido,
+                metodoPago = pagoPedido,
+                onVolverAlInicio = {
+                    navController.popBackStack(Rutas.INICIO, inclusive = false)
+                }
             )
         }
     }

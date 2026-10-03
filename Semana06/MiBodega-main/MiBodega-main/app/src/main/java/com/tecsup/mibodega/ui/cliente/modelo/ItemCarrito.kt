@@ -5,3 +5,6 @@ data class ItemCarrito(
     val cantidad: Int
 )
 
+// Costo fijo de envío. Lo usan Carrito y Datos de entrega para el total.
+const val COSTO_DELIVERY = 4.00
+
