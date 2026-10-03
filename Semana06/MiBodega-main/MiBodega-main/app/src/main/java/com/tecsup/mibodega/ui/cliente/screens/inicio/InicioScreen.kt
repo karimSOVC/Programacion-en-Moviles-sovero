@@ -32,8 +32,11 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -66,13 +69,18 @@ fun InicioScreen(
     onAgregarProducto: (Producto) -> Unit,
     onNavegar: (String) -> Unit
 ) {
-    var categoriaSeleccionada by remember { mutableStateOf(listaCategorias.first()) }
+    // rememberSaveable: la categoría elegida se conserva al ir a otra sección
+    // del menú inferior (o a Detalle) y volver a Inicio.
+    var categoriaSeleccionada by rememberSaveable { mutableStateOf(listaCategorias.first()) }
     var textoBusqueda by remember { mutableStateOf("") }
 
     // Por ahora solo filtra por categoría; el campo de búsqueda todavía no filtra.
+    // No hace falta "actualizar" nada a mano: al cambiar categoriaSeleccionada,
+    // Compose vuelve a ejecutar este filtro y la lista se redibuja sola.
     val productosFiltrados = productos.filter { producto ->
         categoriaSeleccionada == "Todos" || producto.categoria == categoriaSeleccionada
     }
+    val tituloLista = if (categoriaSeleccionada == "Todos") "Productos destacados" else categoriaSeleccionada
 
     Scaffold(
         topBar = {
@@ -119,11 +127,23 @@ fun InicioScreen(
                 )
             )
 
-            Text(
-                text = "Productos destacados",
-                style = MaterialTheme.typography.titleMedium,
-                modifier = Modifier.padding(top = 20.dp, bottom = 4.dp)
-            )
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 20.dp, bottom = 4.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = tituloLista,
+                    style = MaterialTheme.typography.titleMedium
+                )
+                Text(
+                    text = "${productosFiltrados.size} productos",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
 
             LazyRow(
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -136,6 +156,15 @@ fun InicioScreen(
                         onClick = { categoriaSeleccionada = categoria }
                     )
                 }
+            }
+
+            if (productosFiltrados.isEmpty()) {
+                Text(
+                    text = "No hay productos en esta categoría.",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.padding(top = 24.dp)
+                )
             }
 
             LazyColumn(
@@ -168,7 +197,8 @@ private fun ChipCategoria(
 
     Row(
         modifier = Modifier
-            .background(fondo, RoundedCornerShape(20.dp))
+            .clip(RoundedCornerShape(20.dp)) // el efecto al tocar respeta la forma del chip
+            .background(fondo)
             .clickable(onClick = onClick)
             .padding(horizontal = 16.dp, vertical = 10.dp)
     ) {
