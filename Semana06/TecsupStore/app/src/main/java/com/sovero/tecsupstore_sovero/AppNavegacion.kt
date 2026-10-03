@@ -14,6 +14,7 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -27,6 +28,7 @@ fun AppNavegacion() {
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
     var destinoActual by remember { mutableStateOf("Inicio") }
+    val favoritosIds = remember { mutableStateListOf<Int>() }
 
     ModalNavigationDrawer(
         drawerState = drawerState,
@@ -59,7 +61,17 @@ fun AppNavegacion() {
                 "Mis pedidos" -> PantallaPedidos(modifier = modifier)
                 "Favoritos" -> PantallaFavoritos(modifier = modifier)
                 "Perfil" -> PantallaPerfil(modifier = modifier)
-                else -> PantallaInicio(modifier = modifier)
+                else -> PantallaInicio(
+                    favoritosIds = favoritosIds,
+                    onToggleFavorito = { id ->
+                        if (favoritosIds.contains(id)) {
+                            favoritosIds.remove(id)
+                        } else {
+                            favoritosIds.add(id)
+                        }
+                    },
+                    modifier = modifier
+                )
             }
         }
     }

@@ -32,7 +32,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 
 @Composable
-fun TarjetaProducto(producto: Producto, modifier: Modifier = Modifier) {
+fun TarjetaProducto(
+    producto: Producto,
+    esFavorito: Boolean,
+    onToggleFavorito: () -> Unit,
+    modifier: Modifier = Modifier
+) {
     var expanded by remember { mutableStateOf(false) }
 
     Card(modifier = modifier.fillMaxWidth()) {
@@ -66,11 +71,14 @@ fun TarjetaProducto(producto: Producto, modifier: Modifier = Modifier) {
                     onDismissRequest = { expanded = false }
                 ) {
                     DropdownMenuItem(
-                        text = { Text("Favoritos") },
+                        text = { Text(if (esFavorito) "Quitar de favoritos" else "Agregar a favoritos") },
                         leadingIcon = {
                             Icon(imageVector = Icons.Filled.Favorite, contentDescription = null)
                         },
-                        onClick = { expanded = false }
+                        onClick = {
+                            onToggleFavorito()
+                            expanded = false
+                        }
                     )
                     DropdownMenuItem(
                         text = { Text("Compartir") },

@@ -7,10 +7,8 @@ import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
@@ -30,7 +28,11 @@ class MainActivity : ComponentActivity() {
 }
 
 @Composable
-fun PantallaInicio(modifier: Modifier = Modifier) {
+fun PantallaInicio(
+    favoritosIds: List<Int>,
+    onToggleFavorito: (Int) -> Unit,
+    modifier: Modifier = Modifier
+) {
     val productos = listOf(
         Producto(1, "Laptop Lenovo", "Tecnologia", 2499.0),
         Producto(2, "Mouse inalambrico", "Tecnologia", 59.9),
@@ -44,7 +46,11 @@ fun PantallaInicio(modifier: Modifier = Modifier) {
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
         items(productos) { producto ->
-            TarjetaProducto(producto = producto)
+            TarjetaProducto(
+                producto = producto,
+                esFavorito = favoritosIds.contains(producto.id),
+                onToggleFavorito = { onToggleFavorito(producto.id) }
+            )
         }
     }
 }
@@ -53,6 +59,9 @@ fun PantallaInicio(modifier: Modifier = Modifier) {
 @Composable
 fun PantallaInicioPreview() {
     TecsupStoreSoveroTheme {
-        PantallaInicio()
+        PantallaInicio(
+            favoritosIds = emptyList(),
+            onToggleFavorito = {}
+        )
     }
 }
