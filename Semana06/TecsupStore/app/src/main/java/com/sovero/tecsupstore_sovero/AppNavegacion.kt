@@ -34,6 +34,14 @@ fun AppNavegacion() {
     var destinoActual by remember { mutableStateOf("Inicio") }
     val favoritosIds = remember { mutableStateListOf<Int>() }
 
+    val toggleFavorito: (Int) -> Unit = { id ->
+        if (favoritosIds.contains(id)) {
+            favoritosIds.remove(id)
+        } else {
+            favoritosIds.add(id)
+        }
+    }
+
     ModalNavigationDrawer(
         drawerState = drawerState,
         drawerContent = {
@@ -85,17 +93,15 @@ fun AppNavegacion() {
             val modifier = Modifier.padding(innerPadding)
             when (destinoActual) {
                 "Mis pedidos" -> PantallaPedidos(modifier = modifier)
-                "Favoritos" -> PantallaFavoritos(modifier = modifier)
+                "Favoritos" -> PantallaFavoritos(
+                    favoritosIds = favoritosIds,
+                    onToggleFavorito = toggleFavorito,
+                    modifier = modifier
+                )
                 "Perfil" -> PantallaPerfil(modifier = modifier)
                 else -> PantallaInicio(
                     favoritosIds = favoritosIds,
-                    onToggleFavorito = { id ->
-                        if (favoritosIds.contains(id)) {
-                            favoritosIds.remove(id)
-                        } else {
-                            favoritosIds.add(id)
-                        }
-                    },
+                    onToggleFavorito = toggleFavorito,
                     modifier = modifier
                 )
             }
