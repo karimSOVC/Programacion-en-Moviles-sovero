@@ -21,22 +21,12 @@ import com.tecsup.mibodega.ui.cliente.screens.registro.RegistroScreen
 
 /**
  * "Director de orquesta" de la app cliente:
- * - Tiene el NavHost con las rutas de cada pantalla.
+ * - Tiene el NavHost con las rutas de cada pantalla (las rutas están en Rutas.kt).
  * - Tiene el estado del carrito (List<ItemCarrito>), que se reparte
  *   hacia abajo a Inicio, Detalle, Carrito y Entrega.
  * Ninguna Screen navega sola ni modifica el carrito directamente:
  * todas reciben funciones (lambdas) desde aquí (state hoisting).
  */
-private object Rutas {
-    const val BIENVENIDA = "bienvenida"
-    const val REGISTRO = "registro"
-    const val INICIO = "inicio"
-    const val DETALLE = "detalle/{productoId}"
-    const val CARRITO = "carrito"
-
-    fun detalle(productoId: Int) = "detalle/$productoId"
-}
-
 @Composable
 fun ClienteApp() {
     val navController = rememberNavController()
