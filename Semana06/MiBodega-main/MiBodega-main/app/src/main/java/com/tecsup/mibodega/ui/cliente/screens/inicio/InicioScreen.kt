@@ -74,11 +74,14 @@ fun InicioScreen(
     var categoriaSeleccionada by rememberSaveable { mutableStateOf(listaCategorias.first()) }
     var textoBusqueda by remember { mutableStateOf("") }
 
-    // Por ahora solo filtra por categoría; el campo de búsqueda todavía no filtra.
-    // No hace falta "actualizar" nada a mano: al cambiar categoriaSeleccionada,
-    // Compose vuelve a ejecutar este filtro y la lista se redibuja sola.
+    // Los dos filtros trabajan juntos (&&): un producto se muestra solo si es de la
+    // categoría elegida Y su nombre contiene lo que se escribió en el buscador.
+    // No hace falta "actualizar" nada a mano: al cambiar categoriaSeleccionada o
+    // textoBusqueda, Compose vuelve a ejecutar este filtro y la lista se redibuja sola.
     val productosFiltrados = productos.filter { producto ->
-        categoriaSeleccionada == "Todos" || producto.categoria == categoriaSeleccionada
+        val coincideCategoria = categoriaSeleccionada == "Todos" || producto.categoria == categoriaSeleccionada
+        val coincideBusqueda = producto.nombre.contains(textoBusqueda, ignoreCase = true)
+        coincideCategoria && coincideBusqueda
     }
     val tituloLista = if (categoriaSeleccionada == "Todos") "Productos destacados" else categoriaSeleccionada
 
