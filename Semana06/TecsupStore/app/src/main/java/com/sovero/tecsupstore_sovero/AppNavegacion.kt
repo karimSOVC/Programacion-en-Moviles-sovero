@@ -41,7 +41,9 @@ fun AppNavegacion() {
                 destinoActual = destinoActual,
                 cantidadFavoritos = favoritosIds.size,
                 onItemClick = { destino ->
-                    destinoActual = destino
+                    if (destino != "Cerrar sesion") {
+                        destinoActual = destino
+                    }
                     scope.launch { drawerState.close() }
                 }
             )

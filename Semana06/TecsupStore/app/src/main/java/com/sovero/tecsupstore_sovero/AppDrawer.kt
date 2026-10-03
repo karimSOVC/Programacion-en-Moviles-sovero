@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ExitToApp
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Person
@@ -26,6 +27,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 
 @Composable
@@ -47,16 +49,42 @@ fun AppDrawer(
         Spacer(modifier = Modifier.height(8.dp))
         destinos.forEach { (nombre, icono) ->
             NavigationDrawerItem(
-                label = { Text(nombre) },
+                label = {
+                    Text(
+                        text = nombre,
+                        fontWeight = if (destinoActual == nombre) FontWeight.Bold else FontWeight.Normal
+                    )
+                },
                 icon = { Icon(imageVector = icono, contentDescription = null) },
                 selected = destinoActual == nombre,
                 onClick = { onItemClick(nombre) },
                 badge = if (nombre == "Favoritos" && cantidadFavoritos > 0) {
                     { Text(cantidadFavoritos.toString()) }
                 } else null,
+                colors = NavigationDrawerItemDefaults.colors(
+                    selectedContainerColor = MaterialTheme.colorScheme.primaryContainer,
+                    selectedIconColor = MaterialTheme.colorScheme.primary,
+                    selectedTextColor = MaterialTheme.colorScheme.primary
+                ),
                 modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
             )
         }
+        Spacer(modifier = Modifier.weight(1f))
+        HorizontalDivider()
+        Spacer(modifier = Modifier.height(8.dp))
+        NavigationDrawerItem(
+            label = { Text("Cerrar sesion") },
+            icon = {
+                Icon(
+                    imageVector = Icons.AutoMirrored.Filled.ExitToApp,
+                    contentDescription = null
+                )
+            },
+            selected = false,
+            onClick = { onItemClick("Cerrar sesion") },
+            modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
+        )
+        Spacer(modifier = Modifier.height(12.dp))
     }
 }
 
@@ -71,19 +99,27 @@ private fun EncabezadoDrawer() {
         Box(
             modifier = Modifier
                 .size(56.dp)
-                .background(MaterialTheme.colorScheme.primary, CircleShape),
+                .background(MaterialTheme.colorScheme.primaryContainer, CircleShape),
             contentAlignment = Alignment.Center
         ) {
             Text(
                 text = "KS",
-                color = MaterialTheme.colorScheme.onPrimary,
+                color = MaterialTheme.colorScheme.onPrimaryContainer,
+                fontWeight = FontWeight.Bold,
                 style = MaterialTheme.typography.titleMedium
             )
         }
         Spacer(modifier = Modifier.width(16.dp))
         Column {
-            Text(text = "Karim Sovero", style = MaterialTheme.typography.titleMedium)
-            Text(text = "karim@tecsup.edu.pe", style = MaterialTheme.typography.bodySmall)
+            Text(
+                text = "Karim Sovero",
+                fontWeight = FontWeight.Bold,
+                style = MaterialTheme.typography.titleMedium
+            )
+            Text(
+                text = "karim@tecsup.edu.pe",
+                style = MaterialTheme.typography.bodySmall
+            )
         }
     }
 }
