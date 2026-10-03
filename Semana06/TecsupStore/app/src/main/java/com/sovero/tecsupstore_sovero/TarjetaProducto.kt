@@ -54,10 +54,21 @@ fun TarjetaProducto(
             Column(modifier = Modifier.weight(1f)) {
                 Text(text = producto.nombre, style = MaterialTheme.typography.titleMedium)
                 Text(text = producto.categoria, style = MaterialTheme.typography.bodySmall)
-                Text(
-                    text = "S/ ${"%.2f".format(producto.precio)}",
-                    style = MaterialTheme.typography.bodyMedium
-                )
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text(
+                        text = "S/ ${"%.2f".format(producto.precio)}",
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+                    if (esFavorito) {
+                        Spacer(modifier = Modifier.width(4.dp))
+                        Icon(
+                            imageVector = Icons.Filled.Favorite,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier.size(16.dp)
+                        )
+                    }
+                }
             }
             Box {
                 IconButton(onClick = { expanded = true }) {
