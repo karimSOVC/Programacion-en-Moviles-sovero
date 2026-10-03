@@ -15,6 +15,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.material3.Badge
@@ -120,6 +121,14 @@ fun InicioScreen(
                     .padding(top = 8.dp),
                 placeholder = { Text("Buscar productos...") },
                 leadingIcon = { Icon(Icons.Default.Search, contentDescription = null) },
+                // La "X" solo aparece cuando hay algo escrito; al tocarla limpia el buscador.
+                trailingIcon = {
+                    if (textoBusqueda.isNotEmpty()) {
+                        IconButton(onClick = { textoBusqueda = "" }) {
+                            Icon(Icons.Default.Close, contentDescription = "Limpiar búsqueda")
+                        }
+                    }
+                },
                 singleLine = true,
                 shape = RoundedCornerShape(12.dp),
                 colors = OutlinedTextFieldDefaults.colors(
@@ -162,8 +171,14 @@ fun InicioScreen(
             }
 
             if (productosFiltrados.isEmpty()) {
+                // Si escribió algo, el mensaje dice qué buscó; si no, es la categoría la vacía.
+                val mensajeVacio = if (textoBusqueda.isNotEmpty()) {
+                    "No se encontraron productos para \"$textoBusqueda\"."
+                } else {
+                    "No hay productos en esta categoría."
+                }
                 Text(
-                    text = "No hay productos en esta categoría.",
+                    text = mensajeVacio,
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.padding(top = 24.dp)
