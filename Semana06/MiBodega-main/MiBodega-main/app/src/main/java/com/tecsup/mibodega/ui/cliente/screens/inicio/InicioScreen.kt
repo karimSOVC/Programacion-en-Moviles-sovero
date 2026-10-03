@@ -32,7 +32,6 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -50,6 +49,7 @@ import com.tecsup.mibodega.ui.componentes.ProductoCard
 import com.tecsup.mibodega.ui.theme.BodegaTheme
 import com.tecsup.mibodega.ui.theme.GrisClaro
 import com.tecsup.mibodega.ui.theme.VerdeBodega
+import java.text.Normalizer
 
 /**
  * Pantalla 3: Inicio / Productos (mockup "Cliente").
@@ -73,15 +73,17 @@ fun InicioScreen(
     // rememberSaveable: la categoría elegida se conserva al ir a otra sección
     // del menú inferior (o a Detalle) y volver a Inicio.
     var categoriaSeleccionada by rememberSaveable { mutableStateOf(listaCategorias.first()) }
-    var textoBusqueda by remember { mutableStateOf("") }
+    var textoBusqueda by rememberSaveable { mutableStateOf("") }
 
     // Los dos filtros trabajan juntos (&&): un producto se muestra solo si es de la
     // categoría elegida Y su nombre contiene lo que se escribió en el buscador.
     // No hace falta "actualizar" nada a mano: al cambiar categoriaSeleccionada o
     // textoBusqueda, Compose vuelve a ejecutar este filtro y la lista se redibuja sola.
+    // La búsqueda se "limpia" antes de comparar: sin espacios a los lados y sin tildes.
+    val busqueda = textoBusqueda.trim().sinTildes()
     val productosFiltrados = productos.filter { producto ->
         val coincideCategoria = categoriaSeleccionada == "Todos" || producto.categoria == categoriaSeleccionada
-        val coincideBusqueda = producto.nombre.contains(textoBusqueda, ignoreCase = true)
+        val coincideBusqueda = producto.nombre.sinTildes().contains(busqueda, ignoreCase = true)
         coincideCategoria && coincideBusqueda
     }
     val tituloLista = if (categoriaSeleccionada == "Todos") "Productos destacados" else categoriaSeleccionada
@@ -172,8 +174,8 @@ fun InicioScreen(
 
             if (productosFiltrados.isEmpty()) {
                 // Si escribió algo, el mensaje dice qué buscó; si no, es la categoría la vacía.
-                val mensajeVacio = if (textoBusqueda.isNotEmpty()) {
-                    "No se encontraron productos para \"$textoBusqueda\"."
+                val mensajeVacio = if (textoBusqueda.isNotBlank()) {
+                    "No se encontraron productos para \"${textoBusqueda.trim()}\"."
                 } else {
                     "No hay productos en esta categoría."
                 }
@@ -201,6 +203,14 @@ fun InicioScreen(
         }
     }
 }
+
+/**
+ * Quita las tildes de un texto: "Azúcar" -> "Azucar", "Clásicas" -> "Clasicas".
+ * Separa cada letra de su tilde (NFD) y luego borra las tildes sueltas.
+ * Así "azucar" encuentra "Azúcar Rubia Cartavio".
+ */
+private fun String.sinTildes(): String =
+    Normalizer.normalize(this, Normalizer.Form.NFD).replace(Regex("\\p{Mn}+"), "")
 
 // Sub-composables PRIVADOS: solo los usa esta pantalla.
 
