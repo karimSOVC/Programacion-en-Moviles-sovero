@@ -123,6 +123,7 @@ fun TarjetaProducto(
                             expanded = false
                         }
                     )
+                    HorizontalDivider()
                     DropdownMenuItem(
                         text = { Text("Compartir") },
                         leadingIcon = {
