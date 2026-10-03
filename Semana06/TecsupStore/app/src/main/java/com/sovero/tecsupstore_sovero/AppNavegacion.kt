@@ -35,6 +35,7 @@ fun AppNavegacion() {
         drawerContent = {
             AppDrawer(
                 destinoActual = destinoActual,
+                cantidadFavoritos = favoritosIds.size,
                 onItemClick = { destino ->
                     destinoActual = destino
                     scope.launch { drawerState.close() }

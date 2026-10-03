@@ -29,7 +29,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 
 @Composable
-fun AppDrawer(destinoActual: String, onItemClick: (String) -> Unit) {
+fun AppDrawer(
+    destinoActual: String,
+    cantidadFavoritos: Int,
+    onItemClick: (String) -> Unit
+) {
     val destinos = listOf(
         "Inicio" to Icons.Filled.Home,
         "Mis pedidos" to Icons.Filled.ShoppingBag,
@@ -47,6 +51,9 @@ fun AppDrawer(destinoActual: String, onItemClick: (String) -> Unit) {
                 icon = { Icon(imageVector = icono, contentDescription = null) },
                 selected = destinoActual == nombre,
                 onClick = { onItemClick(nombre) },
+                badge = if (nombre == "Favoritos" && cantidadFavoritos > 0) {
+                    { Text(cantidadFavoritos.toString()) }
+                } else null,
                 modifier = Modifier.padding(NavigationDrawerItemDefaults.ItemPadding)
             )
         }
