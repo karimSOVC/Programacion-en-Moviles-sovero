@@ -15,6 +15,11 @@ object Rutas {
     const val ENTREGA = "entrega"
     const val CONFIRMACION = "confirmacion"
 
+    // Destinos del menú inferior (NavigationBar), además de INICIO.
+    const val CATEGORIAS = "categorias"
+    const val PEDIDOS = "pedidos"
+    const val PERFIL = "perfil"
+
     // Arma la ruta de detalle con el id del producto elegido.
     fun detalle(productoId: Int) = "detalle/$productoId"
 }

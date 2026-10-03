@@ -15,9 +15,12 @@ import com.tecsup.mibodega.ui.cliente.modelo.Producto
 import com.tecsup.mibodega.ui.cliente.modelo.listaProductosFake
 import com.tecsup.mibodega.ui.cliente.screens.bienvenida.BienvenidaScreen
 import com.tecsup.mibodega.ui.cliente.screens.carrito.CarritoScreen
+import com.tecsup.mibodega.ui.cliente.screens.categorias.CategoriasScreen
 import com.tecsup.mibodega.ui.cliente.screens.detalle.DetalleProductoScreen
 import com.tecsup.mibodega.ui.cliente.screens.inicio.InicioScreen
 import com.tecsup.mibodega.ui.cliente.screens.login.LoginScreen
+import com.tecsup.mibodega.ui.cliente.screens.pedidos.PedidosScreen
+import com.tecsup.mibodega.ui.cliente.screens.perfil.PerfilScreen
 import com.tecsup.mibodega.ui.cliente.screens.registro.RegistroScreen
 
 /**
@@ -34,6 +37,16 @@ fun ClienteApp() {
 
     // El carrito vive aquí arriba, no en ninguna Screen.
     var carrito by remember { mutableStateOf<List<ItemCarrito>>(emptyList()) }
+
+    // Navegación del menú inferior (NavigationBar). Inicio queda siempre como
+    // base de la pila: así no se acumulan pantallas al cambiar de sección y
+    // el botón atrás regresa a Inicio.
+    val irASeccion: (String) -> Unit = { ruta ->
+        navController.navigate(ruta) {
+            popUpTo(Rutas.INICIO)
+            launchSingleTop = true
+        }
+    }
 
     NavHost(
         navController = navController,
@@ -86,6 +99,27 @@ fun ClienteApp() {
                 },
                 onAgregarProducto = { producto ->
                     carrito = agregarOSumarProducto(carrito, producto, 1)
+                },
+                onNavegar = irASeccion
+            )
+        }
+
+        composable(Rutas.CATEGORIAS) {
+            CategoriasScreen(onNavegar = irASeccion)
+        }
+
+        composable(Rutas.PEDIDOS) {
+            PedidosScreen(onNavegar = irASeccion)
+        }
+
+        composable(Rutas.PERFIL) {
+            PerfilScreen(
+                onNavegar = irASeccion,
+                onCerrarSesion = {
+                    carrito = emptyList()
+                    navController.navigate(Rutas.BIENVENIDA) {
+                        popUpTo(Rutas.INICIO) { inclusive = true }
+                    }
                 }
             )
         }
