@@ -1,6 +1,7 @@
-package com.tecsup.mibodega.ui.cliente.screens.registro
+package com.tecsup.mibodega.ui.cliente.screens.login
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -13,11 +14,9 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.verticalScroll
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.ArrowBack
+import androidx.compose.material.icons.filled.Phone
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -30,37 +29,36 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.tecsup.mibodega.ui.componentes.BotonPrimario
 import com.tecsup.mibodega.ui.componentes.CampoTexto
+import com.tecsup.mibodega.ui.theme.AzulEnlace
 import com.tecsup.mibodega.ui.theme.BodegaTheme
 import com.tecsup.mibodega.ui.theme.GrisClaro
 import com.tecsup.mibodega.ui.theme.VerdeBodega
 
 /**
- * Pantalla 2: Registro de datos (mockup "Cliente").
- * Guarda su propio estado de formulario (remember) porque solo esta
- * pantalla lo necesita. Al enviar, entrega los datos ya listos.
+ * Pantalla de Login: el cliente entra con el teléfono con el que se registró.
+ * Igual que Registro, guarda su propio estado (remember) y no navega sola:
+ * avisa hacia arriba con callbacks.
  */
 @Composable
-fun RegistroScreen(
+fun LoginScreen(
     onVolver: () -> Unit,
-    onCrearCuenta: (nombre: String, telefono: String, direccion: String, referencia: String) -> Unit
+    onIngresar: (telefono: String) -> Unit,
+    onIrARegistro: () -> Unit
 ) {
-    var nombre by remember { mutableStateOf("") }
     var telefono by remember { mutableStateOf("") }
-    var direccion by remember { mutableStateOf("") }
-    var referencia by remember { mutableStateOf("") }
 
     Column(
         modifier = Modifier
             .fillMaxSize()
             .safeDrawingPadding()
-            .verticalScroll(rememberScrollState())
             .padding(horizontal = 24.dp)
     ) {
-        EncabezadoRegistro(onVolver = onVolver)
+        EncabezadoLogin(onVolver = onVolver)
 
         Spacer(Modifier.height(24.dp))
 
@@ -69,25 +67,17 @@ fun RegistroScreen(
             contentAlignment = Alignment.Center
         ) {
             Icon(
-                imageVector = Icons.Default.AccountCircle,
-                contentDescription = "Foto de perfil",
+                imageVector = Icons.Default.Phone,
+                contentDescription = null,
                 tint = VerdeBodega,
                 modifier = Modifier
                     .size(84.dp)
                     .background(GrisClaro, CircleShape)
-                    .padding(4.dp)
+                    .padding(20.dp)
             )
         }
 
         Spacer(Modifier.height(28.dp))
-
-        CampoTexto(
-            etiqueta = "Nombre completo",
-            valor = nombre,
-            onValorCambia = { nombre = it },
-            placeholder = "Juan Pérez"
-        )
-        Spacer(Modifier.height(16.dp))
 
         CampoTexto(
             etiqueta = "Teléfono",
@@ -96,38 +86,24 @@ fun RegistroScreen(
             placeholder = "987 654 321",
             teclado = KeyboardType.Phone
         )
-        Spacer(Modifier.height(16.dp))
-
-        CampoTexto(
-            etiqueta = "Dirección de entrega",
-            valor = direccion,
-            onValorCambia = { direccion = it },
-            placeholder = "Av. Los Olivos 123"
-        )
-        Spacer(Modifier.height(16.dp))
-
-        CampoTexto(
-            etiqueta = "Referencia",
-            valor = referencia,
-            onValorCambia = { referencia = it },
-            placeholder = "Frente al parque"
-        )
 
         Spacer(Modifier.height(28.dp))
 
-        // La referencia es opcional; los otros tres datos son obligatorios.
+        // Solo se puede ingresar si escribió su teléfono.
         BotonPrimario(
-            texto = "Crear cuenta",
-            onClick = { onCrearCuenta(nombre, telefono, direccion, referencia) },
-            habilitado = nombre.isNotBlank() && telefono.isNotBlank() && direccion.isNotBlank()
+            texto = "Ingresar",
+            onClick = { onIngresar(telefono) },
+            habilitado = telefono.isNotBlank()
         )
 
-        Spacer(Modifier.height(24.dp))
+        Spacer(Modifier.height(20.dp))
+
+        PieRegistro(onIrARegistro = onIrARegistro)
     }
 }
 
 @Composable
-private fun EncabezadoRegistro(onVolver: () -> Unit) {
+private fun EncabezadoLogin(onVolver: () -> Unit) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -135,33 +111,49 @@ private fun EncabezadoRegistro(onVolver: () -> Unit) {
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.Center
     ) {
-        IconButton(
-            onClick = onVolver,
-            modifier = Modifier.align(Alignment.CenterVertically)
-        ) {
+        IconButton(onClick = onVolver) {
             Icon(Icons.Default.ArrowBack, contentDescription = "Volver")
         }
         Text(
-            text = "Crear cuenta",
+            text = "Iniciar sesión",
             style = MaterialTheme.typography.titleLarge,
             modifier = Modifier.weight(1f, fill = false)
         )
         Spacer(Modifier.size(48.dp)) // balancea el ancho del ícono de la izquierda
     }
     Text(
-        text = "Completa tus datos para continuar",
+        text = "Ingresa con el teléfono que registraste",
         style = MaterialTheme.typography.bodySmall,
         color = MaterialTheme.colorScheme.onSurfaceVariant,
         modifier = Modifier.fillMaxWidth(),
-        textAlign = androidx.compose.ui.text.style.TextAlign.Center
+        textAlign = TextAlign.Center
     )
+}
+
+@Composable
+private fun PieRegistro(onIrARegistro: () -> Unit) {
+    Column(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Text(
+            text = "¿Aún no tienes cuenta?",
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+        Text(
+            text = "Regístrate aquí",
+            style = MaterialTheme.typography.bodySmall,
+            color = AzulEnlace,
+            modifier = Modifier.clickable(onClick = onIrARegistro)
+        )
+    }
 }
 
 @Preview(showBackground = true, showSystemUi = true)
 @Composable
-private fun RegistroPreview() {
+private fun LoginPreview() {
     BodegaTheme {
-        RegistroScreen(onVolver = {}, onCrearCuenta = { _, _, _, _ -> })
+        LoginScreen(onVolver = {}, onIngresar = {}, onIrARegistro = {})
     }
 }
-
