@@ -12,6 +12,7 @@ import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navArgument
 import com.tecsup.mibodega.ui.cliente.modelo.COSTO_DELIVERY
 import com.tecsup.mibodega.ui.cliente.modelo.ItemCarrito
+import com.tecsup.mibodega.ui.cliente.modelo.Pedido
 import com.tecsup.mibodega.ui.cliente.modelo.Producto
 import com.tecsup.mibodega.ui.cliente.modelo.listaProductosFake
 import com.tecsup.mibodega.ui.cliente.screens.bienvenida.BienvenidaScreen
@@ -40,6 +41,9 @@ fun ClienteApp() {
 
     // El carrito vive aquí arriba, no en ninguna Screen.
     var carrito by remember { mutableStateOf<List<ItemCarrito>>(emptyList()) }
+
+    // Historial de pedidos en memoria
+    var pedidos by remember { mutableStateOf<List<Pedido>>(emptyList()) }
 
     // Resumen del último pedido confirmado, para mostrarlo en Confirmación
     // (el carrito ya se vació cuando esa pantalla aparece).
@@ -118,7 +122,7 @@ fun ClienteApp() {
         }
 
         composable(Rutas.PEDIDOS) {
-            PedidosScreen(onNavegar = irASeccion)
+            PedidosScreen(pedidos = pedidos, onNavegar = irASeccion)
         }
 
         composable(Rutas.PERFIL) {
@@ -126,6 +130,7 @@ fun ClienteApp() {
                 onNavegar = irASeccion,
                 onCerrarSesion = {
                     carrito = emptyList()
+                    pedidos = emptyList()
                     navController.navigate(Rutas.BIENVENIDA) {
                         popUpTo(Rutas.INICIO) { inclusive = true }
                     }
@@ -186,6 +191,15 @@ fun ClienteApp() {
                 total = total,
                 onVolver = { navController.popBackStack() },
                 onConfirmarPedido = { direccion, metodoPago ->
+                    val nuevoPedido = Pedido(
+                        id = pedidos.size + 1,
+                        items = carrito,
+                        total = total,
+                        direccion = direccion,
+                        metodoPago = metodoPago
+                    )
+                    pedidos = listOf(nuevoPedido) + pedidos
+
                     totalPedido = total
                     direccionPedido = direccion
                     pagoPedido = metodoPago
