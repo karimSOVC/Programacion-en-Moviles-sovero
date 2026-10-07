@@ -12,6 +12,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 
 /**
@@ -19,6 +21,7 @@ import androidx.compose.ui.unit.dp
  * de Registro y Datos de entrega. Se usa en: Registro, Datos de entrega.
  *
  * @param teclado tipo de teclado, ej. KeyboardType.Phone para el teléfono
+ * @param esPassword si es true, oculta el texto con PasswordVisualTransformation
  */
 @Composable
 fun CampoTexto(
@@ -27,7 +30,8 @@ fun CampoTexto(
     onValorCambia: (String) -> Unit,
     modifier: Modifier = Modifier,
     placeholder: String? = null,
-    teclado: KeyboardType = KeyboardType.Text
+    teclado: KeyboardType = KeyboardType.Text,
+    esPassword: Boolean = false
 ) {
     Column(modifier = modifier.fillMaxWidth()) {
         Text(
@@ -45,6 +49,7 @@ fun CampoTexto(
             singleLine = true,
             shape = RoundedCornerShape(10.dp),
             keyboardOptions = KeyboardOptions(keyboardType = teclado),
+            visualTransformation = if (esPassword) PasswordVisualTransformation() else VisualTransformation.None,
             colors = OutlinedTextFieldDefaults.colors(
                 unfocusedContainerColor = MaterialTheme.colorScheme.surfaceVariant,
                 focusedContainerColor = MaterialTheme.colorScheme.surfaceVariant,

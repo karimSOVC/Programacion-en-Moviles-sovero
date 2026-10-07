@@ -48,6 +48,10 @@ fun ClienteApp() {
     // Lista de ids de productos favoritos en memoria
     var favoritos by remember { mutableStateOf<List<Int>>(emptyList()) }
 
+    // Credenciales de la cuenta registrada en memoria
+    var correoRegistrado by remember { mutableStateOf("") }
+    var contrasenaRegistrada by remember { mutableStateOf("") }
+
     // Resumen del último pedido confirmado, para mostrarlo en Confirmación
     // (el carrito ya se vació cuando esa pantalla aparece).
     var totalPedido by remember { mutableStateOf(0.0) }
@@ -78,9 +82,10 @@ fun ClienteApp() {
 
         composable(Rutas.LOGIN) {
             LoginScreen(
+                correoRegistrado = correoRegistrado,
+                contrasenaRegistrada = contrasenaRegistrada,
                 onVolver = { navController.popBackStack() },
-                onIngresar = { telefono ->
-                    // TODO: validar el teléfono cuando exista el registro real
+                onIngresar = {
                     navController.navigate(Rutas.INICIO) {
                         popUpTo(Rutas.BIENVENIDA) { inclusive = true }
                     }
@@ -97,10 +102,11 @@ fun ClienteApp() {
         composable(Rutas.REGISTRO) {
             RegistroScreen(
                 onVolver = { navController.popBackStack() },
-                onCrearCuenta = { nombre, telefono, direccion, referencia ->
-                    // TODO: guardar estos datos cuando exista el registro real
-                    navController.navigate(Rutas.INICIO) {
-                        popUpTo(Rutas.BIENVENIDA) { inclusive = true }
+                onCrearCuenta = { nombre, telefono, direccion, referencia, correo, contrasena ->
+                    correoRegistrado = correo.trim().lowercase()
+                    contrasenaRegistrada = contrasena
+                    navController.navigate(Rutas.LOGIN) {
+                        popUpTo(Rutas.BIENVENIDA)
                     }
                 }
             )

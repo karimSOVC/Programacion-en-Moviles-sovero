@@ -16,7 +16,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.Phone
+import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -40,17 +40,20 @@ import com.tecsup.mibodega.ui.theme.GrisClaro
 import com.tecsup.mibodega.ui.theme.VerdeBodega
 
 /**
- * Pantalla de Login: el cliente entra con el teléfono con el que se registró.
- * Igual que Registro, guarda su propio estado (remember) y no navega sola:
- * avisa hacia arriba con callbacks.
+ * Pantalla de Login: el cliente entra con el correo y contraseña con los que se registró.
+ * Guarda su propio estado (remember) y avisa hacia arriba con callbacks.
  */
 @Composable
 fun LoginScreen(
+    correoRegistrado: String,
+    contrasenaRegistrada: String,
     onVolver: () -> Unit,
-    onIngresar: (telefono: String) -> Unit,
+    onIngresar: () -> Unit,
     onIrARegistro: () -> Unit
 ) {
-    var telefono by remember { mutableStateOf("") }
+    var correo by remember { mutableStateOf("") }
+    var contrasena by remember { mutableStateOf("") }
+    var mensajeError by remember { mutableStateOf("") }
 
     Column(
         modifier = Modifier
@@ -67,7 +70,7 @@ fun LoginScreen(
             contentAlignment = Alignment.Center
         ) {
             Icon(
-                imageVector = Icons.Default.Phone,
+                imageVector = Icons.Default.Lock,
                 contentDescription = null,
                 tint = VerdeBodega,
                 modifier = Modifier
@@ -80,20 +83,55 @@ fun LoginScreen(
         Spacer(Modifier.height(28.dp))
 
         CampoTexto(
-            etiqueta = "Teléfono",
-            valor = telefono,
-            onValorCambia = { telefono = it },
-            placeholder = "987 654 321",
-            teclado = KeyboardType.Phone
+            etiqueta = "Correo electrónico",
+            valor = correo,
+            onValorCambia = {
+                correo = it
+                mensajeError = ""
+            },
+            placeholder = "juan@correo.com",
+            teclado = KeyboardType.Email
         )
+
+        Spacer(Modifier.height(16.dp))
+
+        CampoTexto(
+            etiqueta = "Contraseña",
+            valor = contrasena,
+            onValorCambia = {
+                contrasena = it
+                mensajeError = ""
+            },
+            placeholder = "Tu contraseña",
+            teclado = KeyboardType.Password,
+            esPassword = true
+        )
+
+        if (mensajeError.isNotEmpty()) {
+            Spacer(Modifier.height(8.dp))
+            Text(
+                text = mensajeError,
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.error
+            )
+        }
 
         Spacer(Modifier.height(28.dp))
 
-        // Solo se puede ingresar si escribió su teléfono.
         BotonPrimario(
             texto = "Ingresar",
-            onClick = { onIngresar(telefono) },
-            habilitado = telefono.isNotBlank()
+            onClick = {
+                val correoIngresado = correo.trim().lowercase()
+                if (correoRegistrado.isBlank()) {
+                    mensajeError = "Primero debes crear una cuenta."
+                } else if (correoIngresado != correoRegistrado || contrasena != contrasenaRegistrada) {
+                    mensajeError = "Correo o contraseña incorrectos."
+                } else {
+                    mensajeError = ""
+                    onIngresar()
+                }
+            },
+            habilitado = correo.isNotBlank() && contrasena.isNotBlank()
         )
 
         Spacer(Modifier.height(20.dp))
@@ -122,7 +160,7 @@ private fun EncabezadoLogin(onVolver: () -> Unit) {
         Spacer(Modifier.size(48.dp)) // balancea el ancho del ícono de la izquierda
     }
     Text(
-        text = "Ingresa con el teléfono que registraste",
+        text = "Ingresa con el correo y la contraseña que registraste",
         style = MaterialTheme.typography.bodySmall,
         color = MaterialTheme.colorScheme.onSurfaceVariant,
         modifier = Modifier.fillMaxWidth(),
@@ -154,6 +192,12 @@ private fun PieRegistro(onIrARegistro: () -> Unit) {
 @Composable
 private fun LoginPreview() {
     BodegaTheme {
-        LoginScreen(onVolver = {}, onIngresar = {}, onIrARegistro = {})
+        LoginScreen(
+            correoRegistrado = "juan@correo.com",
+            contrasenaRegistrada = "123456",
+            onVolver = {},
+            onIngresar = {},
+            onIrARegistro = {}
+        )
     }
 }

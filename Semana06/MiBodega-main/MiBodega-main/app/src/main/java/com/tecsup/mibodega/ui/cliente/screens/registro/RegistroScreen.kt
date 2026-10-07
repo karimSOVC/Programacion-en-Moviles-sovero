@@ -12,9 +12,9 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccountCircle
 import androidx.compose.material.icons.filled.ArrowBack
@@ -30,6 +30,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.tecsup.mibodega.ui.componentes.BotonPrimario
@@ -46,9 +47,18 @@ import com.tecsup.mibodega.ui.theme.VerdeBodega
 @Composable
 fun RegistroScreen(
     onVolver: () -> Unit,
-    onCrearCuenta: (nombre: String, telefono: String, direccion: String, referencia: String) -> Unit
+    onCrearCuenta: (
+        nombre: String,
+        telefono: String,
+        direccion: String,
+        referencia: String,
+        correo: String,
+        contrasena: String
+    ) -> Unit
 ) {
     var nombre by remember { mutableStateOf("") }
+    var correo by remember { mutableStateOf("") }
+    var contrasena by remember { mutableStateOf("") }
     var telefono by remember { mutableStateOf("") }
     var direccion by remember { mutableStateOf("") }
     var referencia by remember { mutableStateOf("") }
@@ -90,6 +100,25 @@ fun RegistroScreen(
         Spacer(Modifier.height(16.dp))
 
         CampoTexto(
+            etiqueta = "Correo electrónico",
+            valor = correo,
+            onValorCambia = { correo = it },
+            placeholder = "juan@correo.com",
+            teclado = KeyboardType.Email
+        )
+        Spacer(Modifier.height(16.dp))
+
+        CampoTexto(
+            etiqueta = "Contraseña",
+            valor = contrasena,
+            onValorCambia = { contrasena = it },
+            placeholder = "Mínimo 6 caracteres",
+            teclado = KeyboardType.Password,
+            esPassword = true
+        )
+        Spacer(Modifier.height(16.dp))
+
+        CampoTexto(
             etiqueta = "Teléfono",
             valor = telefono,
             onValorCambia = { telefono = it },
@@ -115,11 +144,14 @@ fun RegistroScreen(
 
         Spacer(Modifier.height(28.dp))
 
-        // La referencia es opcional; los otros tres datos son obligatorios.
         BotonPrimario(
             texto = "Crear cuenta",
-            onClick = { onCrearCuenta(nombre, telefono, direccion, referencia) },
-            habilitado = nombre.isNotBlank() && telefono.isNotBlank() && direccion.isNotBlank()
+            onClick = { onCrearCuenta(nombre, telefono, direccion, referencia, correo, contrasena) },
+            habilitado = nombre.isNotBlank() &&
+                    telefono.isNotBlank() &&
+                    direccion.isNotBlank() &&
+                    correo.contains("@") &&
+                    contrasena.length >= 6
         )
 
         Spacer(Modifier.height(24.dp))
@@ -153,7 +185,7 @@ private fun EncabezadoRegistro(onVolver: () -> Unit) {
         style = MaterialTheme.typography.bodySmall,
         color = MaterialTheme.colorScheme.onSurfaceVariant,
         modifier = Modifier.fillMaxWidth(),
-        textAlign = androidx.compose.ui.text.style.TextAlign.Center
+        textAlign = TextAlign.Center
     )
 }
 
@@ -161,7 +193,6 @@ private fun EncabezadoRegistro(onVolver: () -> Unit) {
 @Composable
 private fun RegistroPreview() {
     BodegaTheme {
-        RegistroScreen(onVolver = {}, onCrearCuenta = { _, _, _, _ -> })
+        RegistroScreen(onVolver = {}, onCrearCuenta = { _, _, _, _, _, _ -> })
     }
 }
-

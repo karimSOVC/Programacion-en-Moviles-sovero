@@ -13,7 +13,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Phone
+import androidx.compose.material.icons.filled.Email
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -80,8 +80,8 @@ fun BienvenidaScreen(
 
         BotonPrimario(
             texto = "Registrarme",
-            subtexto = "con mi teléfono",
-            icono = rememberVectorPainter(Icons.Default.Phone),
+            subtexto = "con mi correo",
+            icono = rememberVectorPainter(Icons.Default.Email),
             onClick = onRegistrarse
         )
 
@@ -154,4 +154,3 @@ private fun BienvenidaPreview() {
         BienvenidaScreen({}, {}, {})
     }
 }
-
