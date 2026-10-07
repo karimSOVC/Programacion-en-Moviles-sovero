@@ -1,8 +1,8 @@
 package com.tecsup.mibodega.ui.componentes
 
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.List
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.Receipt
 import androidx.compose.material3.Icon
@@ -24,7 +24,7 @@ private data class ItemBarra(
 
 private val itemsBarra = listOf(
     ItemBarra("Inicio", Icons.Default.Home, Rutas.INICIO),
-    ItemBarra("Categorías", Icons.Default.List, Rutas.CATEGORIAS),
+    ItemBarra("Favoritos", Icons.Default.Favorite, Rutas.FAVORITOS),
     ItemBarra("Pedidos", Icons.Default.Receipt, Rutas.PEDIDOS),
     ItemBarra("Perfil", Icons.Default.Person, Rutas.PERFIL)
 )

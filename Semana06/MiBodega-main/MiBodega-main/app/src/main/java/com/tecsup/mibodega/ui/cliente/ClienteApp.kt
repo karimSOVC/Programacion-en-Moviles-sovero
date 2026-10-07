@@ -17,10 +17,10 @@ import com.tecsup.mibodega.ui.cliente.modelo.Producto
 import com.tecsup.mibodega.ui.cliente.modelo.listaProductosFake
 import com.tecsup.mibodega.ui.cliente.screens.bienvenida.BienvenidaScreen
 import com.tecsup.mibodega.ui.cliente.screens.carrito.CarritoScreen
-import com.tecsup.mibodega.ui.cliente.screens.categorias.CategoriasScreen
 import com.tecsup.mibodega.ui.cliente.screens.confirmacion.ConfirmacionScreen
 import com.tecsup.mibodega.ui.cliente.screens.detalle.DetalleProductoScreen
 import com.tecsup.mibodega.ui.cliente.screens.entrega.DatosEntregaScreen
+import com.tecsup.mibodega.ui.cliente.screens.favoritos.FavoritosScreen
 import com.tecsup.mibodega.ui.cliente.screens.inicio.InicioScreen
 import com.tecsup.mibodega.ui.cliente.screens.login.LoginScreen
 import com.tecsup.mibodega.ui.cliente.screens.pedidos.PedidosScreen
@@ -44,6 +44,9 @@ fun ClienteApp() {
 
     // Historial de pedidos en memoria
     var pedidos by remember { mutableStateOf<List<Pedido>>(emptyList()) }
+
+    // Lista de ids de productos favoritos en memoria
+    var favoritos by remember { mutableStateOf<List<Int>>(emptyList()) }
 
     // Resumen del último pedido confirmado, para mostrarlo en Confirmación
     // (el carrito ya se vació cuando esa pantalla aparece).
@@ -117,8 +120,17 @@ fun ClienteApp() {
             )
         }
 
-        composable(Rutas.CATEGORIAS) {
-            CategoriasScreen(onNavegar = irASeccion)
+        composable(Rutas.FAVORITOS) {
+            FavoritosScreen(
+                favoritos = listaProductosFake.filter { it.id in favoritos },
+                onProductoClick = { producto ->
+                    navController.navigate(Rutas.detalle(producto.id))
+                },
+                onAgregarProducto = { producto ->
+                    carrito = agregarOSumarProducto(carrito, producto, 1)
+                },
+                onNavegar = irASeccion
+            )
         }
 
         composable(Rutas.PEDIDOS) {
@@ -131,6 +143,7 @@ fun ClienteApp() {
                 onCerrarSesion = {
                     carrito = emptyList()
                     pedidos = emptyList()
+                    favoritos = emptyList()
                     navController.navigate(Rutas.BIENVENIDA) {
                         popUpTo(Rutas.INICIO) { inclusive = true }
                     }
@@ -147,6 +160,14 @@ fun ClienteApp() {
 
             DetalleProductoScreen(
                 producto = producto,
+                esFavorito = producto.id in favoritos,
+                onToggleFavorito = {
+                    favoritos = if (producto.id in favoritos) {
+                        favoritos - producto.id
+                    } else {
+                        favoritos + producto.id
+                    }
+                },
                 onVolver = { navController.popBackStack() },
                 onAgregarAlCarrito = { productoSeleccionado, cantidad ->
                     carrito = agregarOSumarProducto(carrito, productoSeleccionado, cantidad)

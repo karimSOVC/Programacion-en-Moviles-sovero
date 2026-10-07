@@ -16,7 +16,7 @@ object Rutas {
     const val CONFIRMACION = "confirmacion"
 
     // Destinos del menú inferior (NavigationBar), además de INICIO.
-    const val CATEGORIAS = "categorias"
+    const val FAVORITOS = "favoritos"
     const val PEDIDOS = "pedidos"
     const val PERFIL = "perfil"
 
