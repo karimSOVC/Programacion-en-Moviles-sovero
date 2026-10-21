@@ -6,6 +6,7 @@ import com.sovero.ayudacampus.data.local.relation.TicketConDetalle
 import com.sovero.ayudacampus.model.ConteoCategoria
 import com.sovero.ayudacampus.model.EstadoTicket
 import com.sovero.ayudacampus.model.Prioridad
+import com.sovero.ayudacampus.model.Rol
 import kotlinx.coroutines.flow.Flow
 
 // El contrato: los ViewModels solo conocen esta interface.
@@ -13,6 +14,8 @@ interface AyudaRepository {
 
     // Usuarios
     suspend fun login(correo: String, clave: String): Usuario?
+    suspend fun usuarioPorId(id: Int): Usuario?
+    suspend fun usuarioPorRol(rol: Rol): Usuario?
 
     // Categorías (ejemplo resuelto)
     fun observarCategorias(): Flow<List<Categoria>>

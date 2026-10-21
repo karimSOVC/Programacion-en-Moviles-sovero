@@ -12,16 +12,12 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.List
-import androidx.compose.material.icons.automirrored.filled.Logout
-import androidx.compose.material.icons.filled.Category
 import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -44,9 +40,7 @@ import com.sovero.ayudacampus.viewmodel.PanelViewModel
 @Composable
 fun PanelScreen(
     vm: PanelViewModel,
-    onVerBandeja: () -> Unit,
-    onCategorias: () -> Unit,
-    onCerrarSesion: () -> Unit
+    onVerBandeja: () -> Unit
 ) {
     val abiertos by vm.abiertos.collectAsState()
     val enProceso by vm.enProceso.collectAsState()
@@ -75,16 +69,6 @@ fun PanelScreen(
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
-                }
-                // TODO (Paso 12): estos accesos pasan a la NavigationBar y cerrar sesion a Ajustes
-                IconButton(onClick = onVerBandeja) {
-                    Icon(Icons.AutoMirrored.Filled.List, contentDescription = "Tickets")
-                }
-                IconButton(onClick = onCategorias) {
-                    Icon(Icons.Filled.Category, contentDescription = "Categorías")
-                }
-                IconButton(onClick = onCerrarSesion) {
-                    Icon(Icons.AutoMirrored.Filled.Logout, contentDescription = "Cerrar sesión")
                 }
             }
 

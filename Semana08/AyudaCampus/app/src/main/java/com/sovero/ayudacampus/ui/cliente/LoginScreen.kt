@@ -42,6 +42,7 @@ fun LoginScreen(vm: SesionViewModel, onIngresar: (Rol) -> Unit) {
 
     val error by vm.error.collectAsState()
     val usuario by vm.usuarioActual.collectAsState()
+    val oscuro by vm.modoOscuro.collectAsState()
 
     // Cuando el login sale bien, el ViewModel llena usuarioActual y pasamos a la pantalla principal
     LaunchedEffect(usuario) {
@@ -51,7 +52,7 @@ fun LoginScreen(vm: SesionViewModel, onIngresar: (Rol) -> Unit) {
         }
     }
 
-    AyudaTheme(rol = rol) {
+    AyudaTheme(rol = rol, oscuro = oscuro) {
         Surface(
             color = MaterialTheme.colorScheme.background,
             modifier = Modifier.fillMaxSize()

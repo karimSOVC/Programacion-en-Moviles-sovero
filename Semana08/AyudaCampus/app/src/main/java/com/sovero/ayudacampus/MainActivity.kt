@@ -15,7 +15,7 @@ class MainActivity : ComponentActivity() {
         val repo = (application as AyudaApp).repository
 
         setContent {
-            // TODO (Paso 12): el rol y el modo oscuro vendran de DataStore
+            // Tema base; cada pantalla aplica su rol y el modo oscuro (DataStore) en NavAyuda
             AyudaTheme(rol = Rol.ADMIN) {
                 NavAyuda(repo)
             }

@@ -16,4 +16,11 @@ interface UsuarioDao {
 
     @Query("SELECT COUNT(*) FROM usuarios")
     suspend fun contar(): Int
+
+    @Query("SELECT * FROM usuarios WHERE id = :id")
+    suspend fun obtenerPorId(id: Int): Usuario?
+
+    // Primer usuario con ese rol (para cambiar de perfil en modo práctica)
+    @Query("SELECT * FROM usuarios WHERE rol = :rol LIMIT 1")
+    suspend fun obtenerPorRol(rol: String): Usuario?
 }

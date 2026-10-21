@@ -9,6 +9,7 @@ import com.sovero.ayudacampus.data.local.relation.TicketConDetalle
 import com.sovero.ayudacampus.model.ConteoCategoria
 import com.sovero.ayudacampus.model.EstadoTicket
 import com.sovero.ayudacampus.model.Prioridad
+import com.sovero.ayudacampus.model.Rol
 import kotlinx.coroutines.flow.Flow
 
 class AyudaRepositoryRoom(private val db: AyudaDatabase) : AyudaRepository {
@@ -16,6 +17,12 @@ class AyudaRepositoryRoom(private val db: AyudaDatabase) : AyudaRepository {
     // Usuarios
     override suspend fun login(correo: String, clave: String): Usuario? =
         db.usuarioDao().login(correo, clave)
+
+    override suspend fun usuarioPorId(id: Int): Usuario? =
+        db.usuarioDao().obtenerPorId(id)
+
+    override suspend fun usuarioPorRol(rol: Rol): Usuario? =
+        db.usuarioDao().obtenerPorRol(rol.name)
 
     // Categorías (ejemplo resuelto)
     override fun observarCategorias(): Flow<List<Categoria>> =

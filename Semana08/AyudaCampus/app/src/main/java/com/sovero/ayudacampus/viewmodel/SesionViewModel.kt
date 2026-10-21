@@ -23,12 +23,30 @@ class SesionViewModel(
     private val _error = MutableStateFlow<String?>(null)
     val error: StateFlow<String?> = _error
 
+    // Preferencias guardadas en DataStore
     val modoOscuro: StateFlow<Boolean> = prefs.modoOscuro
         .stateIn(viewModelScope, SharingStarted.Eagerly, false)
+
+    val notificaciones: StateFlow<Boolean> = prefs.notificaciones
+        .stateIn(viewModelScope, SharingStarted.Eagerly, true)
+
+    val recibirTickets: StateFlow<Boolean> = prefs.recibirTickets
+        .stateIn(viewModelScope, SharingStarted.Eagerly, true)
 
     // Perfil guardado en DataStore (null mientras todavia se esta leyendo)
     val perfilActivo: StateFlow<String?> = prefs.perfilActivo
         .stateIn(viewModelScope, SharingStarted.Eagerly, null)
+
+    init {
+        // Si ya habia una sesion guardada, carga los datos del usuario
+        viewModelScope.launch {
+            prefs.usuarioId.collect { id ->
+                if (id > 0 && _usuarioActual.value == null) {
+                    _usuarioActual.value = repo.usuarioPorId(id)
+                }
+            }
+        }
+    }
 
     fun login(correo: String, clave: String, rolSeleccionado: Rol) {
         if (correo.isBlank() || clave.isBlank()) {
@@ -57,6 +75,30 @@ class SesionViewModel(
 
     fun limpiarError() {
         _error.value = null
+    }
+
+    fun guardarModoOscuro(activo: Boolean) {
+        viewModelScope.launch { prefs.guardarModoOscuro(activo) }
+    }
+
+    fun guardarNotificaciones(activo: Boolean) {
+        viewModelScope.launch { prefs.guardarNotificaciones(activo) }
+    }
+
+    fun guardarRecibirTickets(activo: Boolean) {
+        viewModelScope.launch { prefs.guardarRecibirTickets(activo) }
+    }
+
+    // Modo practica: guarda el otro perfil y avisa cual es para navegar a su grafo
+    fun cambiarPerfil(alTerminar: (Rol) -> Unit) {
+        val nuevoRol = if (perfilActivo.value == Rol.ADMIN.name) Rol.CLIENTE else Rol.ADMIN
+
+        viewModelScope.launch {
+            val usuario = repo.usuarioPorRol(nuevoRol) ?: return@launch
+            prefs.guardarSesion(nuevoRol, usuario.id)
+            _usuarioActual.value = usuario
+            alTerminar(nuevoRol)
+        }
     }
 
     fun cerrarSesion() {

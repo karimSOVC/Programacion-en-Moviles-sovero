@@ -16,14 +16,12 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.Logout
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
@@ -45,8 +43,7 @@ import com.sovero.ayudacampus.viewmodel.MisTicketsViewModel
 fun MisTicketsScreen(
     vm: MisTicketsViewModel,
     onAbrirTicket: (Int) -> Unit,
-    onNuevoTicket: () -> Unit,
-    onCerrarSesion: () -> Unit
+    onNuevoTicket: () -> Unit
 ) {
     val tickets by vm.tickets.collectAsState()
     val abiertos by vm.cantidadAbiertos.collectAsState()
@@ -98,10 +95,6 @@ fun MisTicketsScreen(
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
-                }
-                // TODO (Paso 12): cerrar sesion pasa a la pantalla Perfil
-                IconButton(onClick = onCerrarSesion) {
-                    Icon(Icons.AutoMirrored.Filled.Logout, contentDescription = "Cerrar sesión")
                 }
             }
 
