@@ -50,6 +50,7 @@ fun MisTicketsScreen(
     val nombre by vm.nombre.collectAsState()
     val estado by vm.estadoSeleccionado.collectAsState()
     val texto by vm.textoBusqueda.collectAsState()
+    val sla by vm.sla.collectAsState()
 
     // Chips de filtro: null significa "Todos"
     val filtros: List<Pair<String, EstadoTicket?>> = listOf(
@@ -154,7 +155,9 @@ fun MisTicketsScreen(
                             estado = EstadoTicket.valueOf(t.ticket.estado),
                             prioridad = Prioridad.valueOf(t.ticket.prioridad),
                             onClick = { onAbrirTicket(t.ticket.id) },
-                            subtitulo = t.ticket.ubicacion
+                            subtitulo = t.ticket.ubicacion,
+                            sla = sla[t.ticket.id]?.texto ?: "",
+                            slaVencido = sla[t.ticket.id]?.vencido ?: false
                         )
                     }
                 }

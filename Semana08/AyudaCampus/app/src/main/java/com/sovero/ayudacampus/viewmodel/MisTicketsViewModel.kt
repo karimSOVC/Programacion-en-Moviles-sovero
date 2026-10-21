@@ -52,6 +52,19 @@ class MisTicketsViewModel(
         .map { lista -> lista.count { it.ticket.estado == EstadoTicket.ABIERTO.name } }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 0)
 
+    // SLA de cada ticket (id del ticket -> texto), se recalcula cada minuto
+    val sla: StateFlow<Map<Int, InfoSla>> =
+        combine(misTickets, relojPorMinuto()) { lista, ahora ->
+            val mapa = mutableMapOf<Int, InfoSla>()
+            lista.forEach { t ->
+                val info = calcularSla(t.ticket, ahora)
+                if (info != null) {
+                    mapa[t.ticket.id] = info
+                }
+            }
+            mapa.toMap()
+        }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyMap())
+
     // Contadores para el Perfil
     val cantidadResueltos: StateFlow<Int> = misTickets
         .map { lista -> lista.count { it.ticket.estado == EstadoTicket.RESUELTO.name } }

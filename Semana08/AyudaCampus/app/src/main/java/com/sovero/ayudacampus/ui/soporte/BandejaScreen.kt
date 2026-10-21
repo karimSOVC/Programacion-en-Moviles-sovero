@@ -35,6 +35,7 @@ fun BandejaScreen(
 ) {
     val tickets by vm.tickets.collectAsState()
     val estado by vm.estadoSeleccionado.collectAsState()
+    val sla by vm.sla.collectAsState()
 
     // Chips de filtro: null significa "Todos"
     val filtros: List<Pair<String, EstadoTicket?>> = listOf(
@@ -92,7 +93,9 @@ fun BandejaScreen(
                             estado = EstadoTicket.valueOf(t.ticket.estado),
                             prioridad = Prioridad.valueOf(t.ticket.prioridad),
                             onClick = { onAtender(t.ticket.id) },
-                            subtitulo = t.cliente.nombre // nombre del cliente
+                            subtitulo = t.cliente.nombre, // nombre del cliente
+                            sla = sla[t.ticket.id]?.texto ?: "",
+                            slaVencido = sla[t.ticket.id]?.vencido ?: false
                         )
                     }
                 }

@@ -20,6 +20,7 @@ import androidx.compose.material.icons.filled.Code
 import androidx.compose.material.icons.filled.Computer
 import androidx.compose.material.icons.filled.Key
 import androidx.compose.material.icons.filled.Print
+import androidx.compose.material.icons.filled.Schedule
 import androidx.compose.material.icons.filled.Tag
 import androidx.compose.material.icons.filled.Wifi
 import androidx.compose.material3.Card
@@ -35,6 +36,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.sovero.ayudacampus.model.EstadoTicket
 import com.sovero.ayudacampus.model.Prioridad
+import com.sovero.ayudacampus.ui.theme.ColorAlta
 import com.sovero.ayudacampus.ui.theme.colorPrioridad
 
 // Convierte el texto del icono de la categoria en un icono de Material
@@ -57,7 +59,9 @@ fun TicketCard(
     estado: EstadoTicket,
     prioridad: Prioridad,
     onClick: () -> Unit,
-    subtitulo: String = ""
+    subtitulo: String = "",
+    sla: String = "",
+    slaVencido: Boolean = false
 ) {
     Card(
         onClick = onClick,
@@ -109,6 +113,25 @@ fun TicketCard(
                     Row(horizontalArrangement = Arrangement.spacedBy(6.dp)) {
                         EstadoChip(estado)
                         PrioridadChip(prioridad)
+                    }
+                    // Contador de SLA (el texto ya viene calculado desde el ViewModel)
+                    if (sla.isNotEmpty()) {
+                        Spacer(modifier = Modifier.height(6.dp))
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Icon(
+                                imageVector = Icons.Filled.Schedule,
+                                contentDescription = null,
+                                tint = if (slaVencido) ColorAlta else MaterialTheme.colorScheme.onSurfaceVariant,
+                                modifier = Modifier.size(16.dp)
+                            )
+                            Spacer(modifier = Modifier.width(4.dp))
+                            Text(
+                                text = sla,
+                                style = MaterialTheme.typography.labelMedium,
+                                fontWeight = if (slaVencido) FontWeight.Bold else FontWeight.Normal,
+                                color = if (slaVencido) ColorAlta else MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
                     }
                 }
             }

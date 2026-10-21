@@ -17,9 +17,24 @@ class BandejaViewModel(private val repo: AyudaRepository) : ViewModel() {
     private val _estadoSeleccionado = MutableStateFlow<EstadoTicket?>(null)
     val estadoSeleccionado: StateFlow<EstadoTicket?> = _estadoSeleccionado
 
+    private val todos = repo.observarTodosLosTickets()
+
+    // SLA de cada ticket (id del ticket -> texto), se recalcula cada minuto
+    val sla: StateFlow<Map<Int, InfoSla>> =
+        combine(todos, relojPorMinuto()) { lista, ahora ->
+            val mapa = mutableMapOf<Int, InfoSla>()
+            lista.forEach { t ->
+                val info = calcularSla(t.ticket, ahora)
+                if (info != null) {
+                    mapa[t.ticket.id] = info
+                }
+            }
+            mapa.toMap()
+        }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyMap())
+
     // El DAO ya entrega ALTA, MEDIA, BAJA y el mas reciente primero; filter conserva ese orden
     val tickets: StateFlow<List<TicketConDetalle>> =
-        combine(repo.observarTodosLosTickets(), _estadoSeleccionado) { lista, estado ->
+        combine(todos, _estadoSeleccionado) { lista, estado ->
             if (estado == null) {
                 lista
             } else {
