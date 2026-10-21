@@ -2,6 +2,11 @@ package com.sovero.ayudacampus.ui.navigation
 
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material3.FloatingActionButton
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -23,10 +28,13 @@ import com.sovero.ayudacampus.ui.cliente.MisTicketsScreen
 import com.sovero.ayudacampus.ui.cliente.NuevoTicketScreen
 import com.sovero.ayudacampus.ui.cliente.SplashScreen
 import com.sovero.ayudacampus.ui.components.AppTopBar
+import com.sovero.ayudacampus.ui.soporte.AtenderTicketScreen
 import com.sovero.ayudacampus.ui.soporte.BandejaScreen
 import com.sovero.ayudacampus.ui.soporte.CategoriasScreen
+import com.sovero.ayudacampus.ui.soporte.FormularioCategoriaScreen
 import com.sovero.ayudacampus.ui.soporte.PanelScreen
 import com.sovero.ayudacampus.ui.theme.AyudaTheme
+import com.sovero.ayudacampus.viewmodel.AtenderViewModel
 import com.sovero.ayudacampus.viewmodel.AyudaViewModelFactory
 import com.sovero.ayudacampus.viewmodel.BandejaViewModel
 import com.sovero.ayudacampus.viewmodel.CategoriasViewModel
@@ -137,10 +145,26 @@ fun NavAyuda(repo: AyudaRepository) {
             AyudaTheme(rol = Rol.ADMIN) {
                 BandejaScreen(
                     vm = vm,
-                    onAtender = { id ->
-                        // TODO (Paso 11): navController.navigate(Rutas.atenderTicket(id))
-                    },
+                    onAtender = { id -> navController.navigate(Rutas.atenderTicket(id)) },
                     onAtras = { navController.popBackStack() }
+                )
+            }
+        }
+
+        composable(
+            route = Rutas.ATENDER_TICKET,
+            arguments = listOf(navArgument("ticketId") { type = NavType.IntType })
+        ) { entrada ->
+            val id = entrada.arguments?.getInt("ticketId") ?: 0
+            val vm: AtenderViewModel = viewModel(factory = factory)
+            LaunchedEffect(id) {
+                vm.cargar(id)
+            }
+            AyudaTheme(rol = Rol.ADMIN) {
+                AtenderTicketScreen(
+                    vm = vm,
+                    onAtras = { navController.popBackStack() },
+                    onGuardado = { navController.popBackStack() }
                 )
             }
         }
@@ -151,19 +175,45 @@ fun NavAyuda(repo: AyudaRepository) {
                 Scaffold(
                     topBar = {
                         AppTopBar(titulo = "Categorías", onAtras = { navController.popBackStack() })
+                    },
+                    floatingActionButton = {
+                        FloatingActionButton(
+                            onClick = { navController.navigate("formulario_categoria") },
+                            containerColor = MaterialTheme.colorScheme.primary,
+                            contentColor = MaterialTheme.colorScheme.onPrimary
+                        ) {
+                            Icon(Icons.Filled.Add, contentDescription = "Nueva categoría")
+                        }
                     }
                 ) { padding ->
                     Box(modifier = Modifier.padding(padding)) {
                         CategoriasScreen(
                             vm = vm,
-                            onEditar = { /* TODO (Paso 11): abrir FormularioCategoriaScreen */ }
+                            onEditar = { id -> navController.navigate(Rutas.formularioCategoria(id)) }
                         )
                     }
                 }
             }
         }
 
-        // TODO (Paso 11): Atender ticket y Formulario de categoria
+        composable(
+            route = Rutas.FORMULARIO_CATEGORIA,
+            arguments = listOf(navArgument("categoriaId") {
+                type = NavType.IntType
+                defaultValue = -1 // -1 = categoria nueva
+            })
+        ) { entrada ->
+            val id = entrada.arguments?.getInt("categoriaId") ?: -1
+            val vm: CategoriasViewModel = viewModel(factory = factory)
+            AyudaTheme(rol = Rol.ADMIN) {
+                FormularioCategoriaScreen(
+                    vm = vm,
+                    categoriaId = if (id == -1) null else id,
+                    onListo = { navController.popBackStack() }
+                )
+            }
+        }
+
         // TODO (Paso 12): Perfil, Ajustes y la NavigationBar de cada perfil
     }
 }

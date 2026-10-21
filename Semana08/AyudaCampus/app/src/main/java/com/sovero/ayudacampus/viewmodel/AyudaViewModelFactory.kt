@@ -34,9 +34,9 @@ class AyudaViewModelFactory(
         if (modelClass.isAssignableFrom(BandejaViewModel::class.java)) {
             return BandejaViewModel(repo) as T
         }
-
-        // TODO: agrega aqui cada ViewModel nuevo que crees
-        // (Atender)
+        if (modelClass.isAssignableFrom(AtenderViewModel::class.java)) {
+            return AtenderViewModel(repo, prefs) as T
+        }
 
         throw IllegalArgumentException("ViewModel desconocido: " + modelClass.name)
     }
