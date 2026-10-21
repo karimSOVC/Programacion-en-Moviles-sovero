@@ -12,18 +12,22 @@ import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import com.sovero.ayudacampus.data.prefs.PreferenciasStore
 import com.sovero.ayudacampus.data.repository.AyudaRepository
 import com.sovero.ayudacampus.model.Rol
+import com.sovero.ayudacampus.ui.cliente.DetalleTicketScreen
 import com.sovero.ayudacampus.ui.cliente.LoginScreen
 import com.sovero.ayudacampus.ui.cliente.MisTicketsScreen
 import com.sovero.ayudacampus.ui.cliente.NuevoTicketScreen
@@ -36,6 +40,7 @@ import com.sovero.ayudacampus.viewmodel.CategoriasViewModel
 import com.sovero.ayudacampus.viewmodel.MisTicketsViewModel
 import com.sovero.ayudacampus.viewmodel.NuevoTicketViewModel
 import com.sovero.ayudacampus.viewmodel.SesionViewModel
+import com.sovero.ayudacampus.viewmodel.TicketDetalleViewModel
 
 @Composable
 fun NavAyuda(repo: AyudaRepository) {
@@ -85,9 +90,7 @@ fun NavAyuda(repo: AyudaRepository) {
             AyudaTheme(rol = Rol.CLIENTE) {
                 MisTicketsScreen(
                     vm = vm,
-                    onAbrirTicket = { id ->
-                        // TODO (Paso 9): navController.navigate(Rutas.detalleTicket(id))
-                    },
+                    onAbrirTicket = { id -> navController.navigate(Rutas.detalleTicket(id)) },
                     onNuevoTicket = { navController.navigate(Rutas.NUEVO_TICKET) },
                     onCerrarSesion = cerrarSesion
                 )
@@ -102,6 +105,20 @@ fun NavAyuda(repo: AyudaRepository) {
                     onAtras = { navController.popBackStack() },
                     onEnviado = { navController.popBackStack() }
                 )
+            }
+        }
+
+        composable(
+            route = Rutas.DETALLE_TICKET,
+            arguments = listOf(navArgument("ticketId") { type = NavType.IntType })
+        ) { entrada ->
+            val id = entrada.arguments?.getInt("ticketId") ?: 0
+            val vm: TicketDetalleViewModel = viewModel(factory = factory)
+            LaunchedEffect(id) {
+                vm.cargar(id)
+            }
+            AyudaTheme(rol = Rol.CLIENTE) {
+                DetalleTicketScreen(vm = vm, onAtras = { navController.popBackStack() })
             }
         }
 
