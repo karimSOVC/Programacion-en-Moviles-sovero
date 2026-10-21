@@ -25,12 +25,14 @@ import com.sovero.ayudacampus.data.prefs.PreferenciasStore
 import com.sovero.ayudacampus.data.repository.AyudaRepository
 import com.sovero.ayudacampus.model.Rol
 import com.sovero.ayudacampus.ui.cliente.LoginScreen
+import com.sovero.ayudacampus.ui.cliente.MisTicketsScreen
 import com.sovero.ayudacampus.ui.cliente.SplashScreen
 import com.sovero.ayudacampus.ui.components.AppTopBar
 import com.sovero.ayudacampus.ui.soporte.CategoriasScreen
 import com.sovero.ayudacampus.ui.theme.AyudaTheme
 import com.sovero.ayudacampus.viewmodel.AyudaViewModelFactory
 import com.sovero.ayudacampus.viewmodel.CategoriasViewModel
+import com.sovero.ayudacampus.viewmodel.MisTicketsViewModel
 import com.sovero.ayudacampus.viewmodel.SesionViewModel
 
 @Composable
@@ -76,13 +78,20 @@ fun NavAyuda(repo: AyudaRepository) {
             })
         }
 
-        // TODO (Paso 7): reemplazar por MisTicketsScreen
         composable(Rutas.MIS_TICKETS) {
-            PantallaTemporal(
-                rol = Rol.CLIENTE,
-                titulo = "Mis tickets",
-                onCerrarSesion = cerrarSesion
-            )
+            val vm: MisTicketsViewModel = viewModel(factory = factory)
+            AyudaTheme(rol = Rol.CLIENTE) {
+                MisTicketsScreen(
+                    vm = vm,
+                    onAbrirTicket = { id ->
+                        // TODO (Paso 9): navController.navigate(Rutas.detalleTicket(id))
+                    },
+                    onNuevoTicket = {
+                        // TODO (Paso 8): navController.navigate(Rutas.NUEVO_TICKET)
+                    },
+                    onCerrarSesion = cerrarSesion
+                )
+            }
         }
 
         // TODO (Paso 10): reemplazar por PanelScreen

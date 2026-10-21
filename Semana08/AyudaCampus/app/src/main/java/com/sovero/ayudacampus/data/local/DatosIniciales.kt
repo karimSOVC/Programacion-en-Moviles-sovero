@@ -29,7 +29,7 @@ suspend fun sembrar(db: AyudaDatabase) {
         // 2 usuarios: id 1 = estudiante, id 2 = soporte
         usuarioDao.insertarTodos(
             listOf(
-                Usuario(nombre = "Juan Pérez", correo = "karim@campus.test", clave = "1234", rol = Rol.CLIENTE.name),
+                Usuario(nombre = "Karim Sovero", correo = "karim@campus.test", clave = "1234", rol = Rol.CLIENTE.name),
                 Usuario(nombre = "Soporte TI", correo = "soporte@campus.test", clave = "admin", rol = Rol.ADMIN.name)
             )
         )
@@ -111,7 +111,7 @@ suspend fun sembrar(db: AyudaDatabase) {
         )
         ticketDao.insertarComentario(
             Comentario(
-                ticketId = t2.toInt(), autorId = 1, autorNombre = "Juan Pérez", autorRol = Rol.CLIENTE.name,
+                ticketId = t2.toInt(), autorId = 1, autorNombre = "Karim Sovero", autorRol = Rol.CLIENTE.name,
                 texto = "Gracias, quedo atento.",
                 fecha = ahora - 3 * hora
             )
