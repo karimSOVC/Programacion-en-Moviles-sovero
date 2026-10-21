@@ -28,9 +28,15 @@ class AyudaViewModelFactory(
         if (modelClass.isAssignableFrom(TicketDetalleViewModel::class.java)) {
             return TicketDetalleViewModel(repo) as T
         }
+        if (modelClass.isAssignableFrom(PanelViewModel::class.java)) {
+            return PanelViewModel(repo) as T
+        }
+        if (modelClass.isAssignableFrom(BandejaViewModel::class.java)) {
+            return BandejaViewModel(repo) as T
+        }
 
         // TODO: agrega aqui cada ViewModel nuevo que crees
-        // (Panel, Bandeja, Atender)
+        // (Atender)
 
         throw IllegalArgumentException("ViewModel desconocido: " + modelClass.name)
     }
