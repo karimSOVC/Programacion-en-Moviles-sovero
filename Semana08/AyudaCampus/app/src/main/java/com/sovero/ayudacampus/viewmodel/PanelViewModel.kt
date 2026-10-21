@@ -53,4 +53,25 @@ class PanelViewModel(private val repo: AyudaRepository) : ViewModel() {
     val altasSinAtender: StateFlow<Int> = repo
         .observarAltasSinAtender(System.currentTimeMillis() - 3600 * 1000L)
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 0)
+
+    // Tiempo promedio de resolucion (fechaCierre - fecha) ya convertido a texto
+    val tiempoPromedio: StateFlow<String> = repo.observarTiempoPromedioResolucion()
+        .map { promedio -> textoDuracion(promedio) }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), "Sin tickets cerrados")
+
+    private fun textoDuracion(milisegundos: Double?): String {
+        if (milisegundos == null) return "Sin tickets cerrados"
+
+        val minutos = (milisegundos / 60000).toLong()
+        val horas = minutos / 60
+        val dias = horas / 24
+
+        return if (minutos < 60) {
+            "$minutos min"
+        } else if (horas < 24) {
+            "$horas h " + (minutos % 60) + " min"
+        } else {
+            "$dias d " + (horas % 24) + " h"
+        }
+    }
 }
