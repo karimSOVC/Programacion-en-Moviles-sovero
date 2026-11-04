@@ -1,6 +1,9 @@
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.compose)
+
+    // Aplicar el plugin de Firebase en el módulo app
+    id("com.google.gms.google-services")
 }
 
 android {
@@ -36,6 +39,13 @@ android {
 }
 
 dependencies {
+    // Firebase: BOM + Authentication
+    implementation(platform("com.google.firebase:firebase-bom:33.1.0"))
+    implementation("com.google.firebase:firebase-auth-ktx")
+
+    // Navigation Compose (para NavHost, NavController, composable, etc.)
+    implementation("androidx.navigation:navigation-compose:2.8.0")
+
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.androidx.activity.compose)
     implementation(libs.androidx.compose.material3)
