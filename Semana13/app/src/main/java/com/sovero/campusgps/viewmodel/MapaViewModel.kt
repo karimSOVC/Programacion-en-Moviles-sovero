@@ -5,7 +5,9 @@ import androidx.lifecycle.viewModelScope
 import com.sovero.campusgps.data.LugaresRepository
 import com.sovero.campusgps.data.UbicacionRepository
 import com.sovero.campusgps.model.LugarConDistancia
+import com.sovero.campusgps.model.Posicion
 import com.sovero.campusgps.model.UbicacionUi
+import com.sovero.campusgps.util.distanciaMetros
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -33,7 +35,7 @@ class MapaViewModel(
             ubicacionRepo.obtenerPosicion()
                 .onSuccess {
                     _estado.value = UbicacionUi.Lista(it)
-                    // TODO Paso 5: actualizarDistancias(it)
+                    actualizarDistancias(it)
                 }
                 .onFailure { _estado.value = UbicacionUi.Error(mensajeDe(it)) }
         }
@@ -41,6 +43,16 @@ class MapaViewModel(
 
     fun permisoDenegado() {
         _estado.value = UbicacionUi.Error("Sin permiso de ubicación no puedo mostrar dónde estás")
+    }
+
+    /**
+     * Calcula la distancia desde mi posición a cada lugar, ordena la lista
+     * del más cercano al más lejano y la publica en _lugares.
+     */
+    private fun actualizarDistancias(pos: Posicion) {
+        _lugares.value = lugaresRepo.obtenerLugares()
+            .map { lugar -> LugarConDistancia(lugar, distanciaMetros(pos, lugar)) }
+            .sortedBy { it.metros }
     }
 
     // TODO Paso 6: fun seleccionar(id: Int?)
