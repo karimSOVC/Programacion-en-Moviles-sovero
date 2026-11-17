@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.Button
@@ -42,6 +43,8 @@ fun PantallaMapa(
     vm: MapaViewModel = viewModel(factory = CampusViewModelFactory(LocalContext.current))
 ) {
     val estado by vm.estado.collectAsState()
+    val lugares by vm.lugares.collectAsState()
+    val seleccionado by vm.seleccionado.collectAsState()
 
     // ---- Permiso de ubicación en tiempo de ejecución ----
     val contexto = LocalContext.current
@@ -93,30 +96,45 @@ fun PantallaMapa(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(padding)
-                .padding(16.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
         ) {
-            Button(
-                onClick = { alPulsar() },
-                enabled = estado !is UbicacionUi.Buscando
+            // El mapa ocupa todo el espacio libre de arriba
+            MapaUbicacion(
+                estado = estado,
+                lugares = lugares,
+                seleccionado = seleccionado,
+                modifier = Modifier
+                    .weight(1f)
+                    .fillMaxWidth()
+            )
+
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center
             ) {
-                Text("Obtener mi ubicación")
-            }
-
-            Spacer(modifier = Modifier.height(24.dp))
-
-            when (val e = estado) {
-                UbicacionUi.Inicial -> Text("Pulsa el botón para ver dónde estás")
-                UbicacionUi.Buscando -> CircularProgressIndicator()
-                is UbicacionUi.Lista -> {
-                    Text("Latitud: ${e.posicion.latitud}")
-                    Text("Longitud: ${e.posicion.longitud}")
+                Button(
+                    onClick = { alPulsar() },
+                    enabled = estado !is UbicacionUi.Buscando
+                ) {
+                    Text("Obtener mi ubicación")
                 }
-                is UbicacionUi.Error -> Text(
-                    text = e.mensaje,
-                    color = MaterialTheme.colorScheme.error
-                )
+
+                Spacer(modifier = Modifier.height(12.dp))
+
+                when (val e = estado) {
+                    UbicacionUi.Inicial -> Text("Pulsa el botón para ver dónde estás")
+                    UbicacionUi.Buscando -> CircularProgressIndicator()
+                    is UbicacionUi.Lista -> {
+                        Text("Latitud: ${e.posicion.latitud}")
+                        Text("Longitud: ${e.posicion.longitud}")
+                    }
+                    is UbicacionUi.Error -> Text(
+                        text = e.mensaje,
+                        color = MaterialTheme.colorScheme.error
+                    )
+                }
             }
         }
     }
