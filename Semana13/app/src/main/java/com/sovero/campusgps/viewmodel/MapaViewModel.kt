@@ -3,10 +3,12 @@ package com.sovero.campusgps.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.sovero.campusgps.data.LugaresRepository
+import com.sovero.campusgps.data.UbicacionNoDisponibleException
 import com.sovero.campusgps.data.UbicacionRepository
 import com.sovero.campusgps.model.Lugar
 import com.sovero.campusgps.model.LugarConDistancia
 import com.sovero.campusgps.model.Posicion
+import com.sovero.campusgps.model.TipoError
 import com.sovero.campusgps.model.UbicacionUi
 import com.sovero.campusgps.util.distanciaMetros
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -34,6 +36,15 @@ class MapaViewModel(
     val seleccionado: StateFlow<Int?> = _seleccionado.asStateFlow()
 
     fun buscar() {
+        // Antes de buscar, revisa que el celular tenga Google Play Services
+        if (!ubicacionRepo.playServicesDisponible()) {
+            _estado.value = UbicacionUi.Error(
+                "Este dispositivo no tiene Google Play Services",
+                TipoError.SIN_PLAY_SERVICES
+            )
+            return
+        }
+
         _estado.value = UbicacionUi.Buscando
         viewModelScope.launch {
             ubicacionRepo.obtenerPosicion()
@@ -41,12 +52,15 @@ class MapaViewModel(
                     _estado.value = UbicacionUi.Lista(it)
                     actualizarDistancias(it)
                 }
-                .onFailure { _estado.value = UbicacionUi.Error(mensajeDe(it)) }
+                .onFailure { _estado.value = errorDe(it) }
         }
     }
 
     fun permisoDenegado() {
-        _estado.value = UbicacionUi.Error("Sin permiso de ubicación no puedo mostrar dónde estás")
+        _estado.value = UbicacionUi.Error(
+            "Sin permiso de ubicación no puedo mostrar dónde estás",
+            TipoError.SIN_PERMISO
+        )
     }
 
     /**
@@ -71,8 +85,19 @@ class MapaViewModel(
         .map { lista -> lista.firstOrNull { it.metros != null }?.lugar }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), null)
 
-    private fun mensajeDe(e: Throwable): String = when (e) {
-        is SecurityException -> "Falta el permiso de ubicación"
-        else -> e.message ?: "No se pudo obtener la ubicación"
+    /** Convierte la excepción en un error con su mensaje y su tipo. */
+    private fun errorDe(e: Throwable): UbicacionUi.Error = when (e) {
+        is SecurityException -> UbicacionUi.Error(
+            "Falta el permiso de ubicación",
+            TipoError.SIN_PERMISO
+        )
+        is UbicacionNoDisponibleException -> UbicacionUi.Error(
+            "Activa el GPS e intenta de nuevo",
+            TipoError.GPS_APAGADO
+        )
+        else -> UbicacionUi.Error(
+            e.message ?: "No se pudo obtener la ubicación",
+            TipoError.OTRO
+        )
     }
 }

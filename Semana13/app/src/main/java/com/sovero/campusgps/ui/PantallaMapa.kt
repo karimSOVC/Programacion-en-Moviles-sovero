@@ -1,7 +1,10 @@
 package com.sovero.campusgps.ui
 
 import android.Manifest
+import android.content.Intent
 import android.content.pm.PackageManager
+import android.net.Uri
+import android.provider.Settings
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
@@ -145,9 +148,17 @@ fun PantallaMapa(
                     is UbicacionUi.Lista -> Text(
                         "Lat: ${e.posicion.latitud}  ·  Lon: ${e.posicion.longitud}"
                     )
-                    is UbicacionUi.Error -> Text(
-                        text = e.mensaje,
-                        color = MaterialTheme.colorScheme.error
+                    is UbicacionUi.Error -> MensajeError(
+                        error = e,
+                        onAbrirAjustes = {
+                            // Abre la pantalla de ajustes de esta app (permisos)
+                            val intent = Intent(
+                                Settings.ACTION_APPLICATION_DETAILS_SETTINGS,
+                                Uri.fromParts("package", contexto.packageName, null)
+                            )
+                            contexto.startActivity(intent)
+                        },
+                        onReintentar = { alPulsar() }
                     )
                 }
 

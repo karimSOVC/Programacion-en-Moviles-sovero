@@ -2,6 +2,8 @@ package com.sovero.campusgps.data
 
 import android.annotation.SuppressLint
 import android.content.Context
+import com.google.android.gms.common.ConnectionResult
+import com.google.android.gms.common.GoogleApiAvailability
 import com.google.android.gms.location.LocationServices
 import com.google.android.gms.location.Priority
 import com.google.android.gms.tasks.CancellationTokenSource
@@ -14,7 +16,7 @@ import kotlinx.coroutines.tasks.await
  *
  * Es el único lugar de la app que habla con el servicio de ubicación.
  */
-class UbicacionRepositoryGoogle(context: Context) : UbicacionRepository {
+class UbicacionRepositoryGoogle(private val context: Context) : UbicacionRepository {
 
     private val cliente = LocationServices.getFusedLocationProviderClient(context)
 
@@ -30,9 +32,14 @@ class UbicacionRepositoryGoogle(context: Context) : UbicacionRepository {
         if (ubicacion != null) {
             Result.success(Posicion(ubicacion.latitude, ubicacion.longitude))
         } else {
-            Result.failure(Exception("No se pudo obtener la ubicación"))
+            // null = no se pudo determinar (por ejemplo, GPS apagado)
+            Result.failure(UbicacionNoDisponibleException())
         }
     } catch (e: Exception) {
         Result.failure(e)
     }
+
+    override fun playServicesDisponible(): Boolean =
+        GoogleApiAvailability.getInstance()
+            .isGooglePlayServicesAvailable(context) == ConnectionResult.SUCCESS
 }
