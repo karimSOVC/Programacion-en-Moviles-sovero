@@ -28,8 +28,9 @@ import androidx.compose.ui.unit.dp
 import com.sovero.campusgps.model.LugarConDistancia
 import com.sovero.campusgps.util.formatearDistancia
 
-// Mismo azul que los marcadores de los lugares (HUE_AZURE)
+// Mismos colores que los marcadores: azul (HUE_AZURE) y verde (HUE_GREEN)
 private val AzulMarcador = Color(0xFF2196F3)
+private val VerdeMarcador = Color(0xFF4CAF50)
 
 /**
  * Lista de lugares con su distancia.
@@ -42,7 +43,8 @@ fun ListaLugares(
     lugares: List<LugarConDistancia>,
     seleccionado: Int?,
     onClick: (Int) -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    masCercanoId: Int? = null
 ) {
     LazyColumn(
         modifier = modifier,
@@ -76,7 +78,10 @@ fun ListaLugares(
                     Box(
                         modifier = Modifier
                             .size(12.dp)
-                            .background(AzulMarcador, CircleShape)
+                            .background(
+                                if (item.lugar.id == masCercanoId) VerdeMarcador else AzulMarcador,
+                                CircleShape
+                            )
                     )
                     Spacer(modifier = Modifier.width(12.dp))
                     Column(modifier = Modifier.weight(1f)) {

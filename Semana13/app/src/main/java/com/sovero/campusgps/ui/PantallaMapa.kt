@@ -6,6 +6,7 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -15,6 +16,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -24,11 +26,13 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import androidx.compose.runtime.collectAsState
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.sovero.campusgps.model.UbicacionUi
+import com.sovero.campusgps.util.formatearDistancia
 import com.sovero.campusgps.viewmodel.CampusViewModelFactory
 import com.sovero.campusgps.viewmodel.MapaViewModel
 
@@ -45,6 +49,7 @@ fun PantallaMapa(
     val estado by vm.estado.collectAsState()
     val lugares by vm.lugares.collectAsState()
     val seleccionado by vm.seleccionado.collectAsState()
+    val masCercano by vm.masCercano.collectAsState()
 
     // ---- Permiso de ubicación en tiempo de ejecución ----
     val contexto = LocalContext.current
@@ -102,6 +107,7 @@ fun PantallaMapa(
                 estado = estado,
                 lugares = lugares,
                 seleccionado = seleccionado,
+                masCercanoId = masCercano?.id,
                 modifier = Modifier
                     .weight(1f)
                     .fillMaxWidth()
@@ -114,11 +120,21 @@ fun PantallaMapa(
                 horizontalAlignment = Alignment.CenterHorizontally,
                 verticalArrangement = Arrangement.Center
             ) {
-                Button(
-                    onClick = { alPulsar() },
-                    enabled = estado !is UbicacionUi.Buscando
-                ) {
-                    Text("Obtener mi ubicación")
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    // Botón principal (relleno)
+                    Button(
+                        onClick = { alPulsar() },
+                        enabled = estado !is UbicacionUi.Buscando
+                    ) {
+                        Text("Obtener mi ubicación")
+                    }
+                    // Botón secundario (con borde): deshabilitado hasta tener ubicación
+                    OutlinedButton(
+                        onClick = { masCercano?.let { vm.seleccionar(it.id) } },
+                        enabled = masCercano != null
+                    ) {
+                        Text("Ir al más cercano")
+                    }
                 }
 
                 Spacer(modifier = Modifier.height(8.dp))
@@ -134,12 +150,23 @@ fun PantallaMapa(
                         color = MaterialTheme.colorScheme.error
                     )
                 }
+
+                // Texto con el lugar más cercano y su distancia
+                masCercano?.let { lugar ->
+                    val metros = lugares.firstOrNull { it.lugar.id == lugar.id }?.metros
+                    Text(
+                        text = "Más cercano: ${lugar.nombre}" +
+                            (metros?.let { " (${formatearDistancia(it)})" } ?: ""),
+                        fontWeight = FontWeight.SemiBold
+                    )
+                }
             }
 
             // Lista de lugares con altura fija debajo del mapa
             ListaLugares(
                 lugares = lugares,
                 seleccionado = seleccionado,
+                masCercanoId = masCercano?.id,
                 onClick = { id -> vm.seleccionar(id) },
                 modifier = Modifier
                     .fillMaxWidth()
