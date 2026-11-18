@@ -9,14 +9,18 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FilterChip
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
@@ -52,7 +56,9 @@ fun PantallaMapa(
     vm: MapaViewModel = viewModel(factory = CampusViewModelFactory(LocalContext.current))
 ) {
     val estado by vm.estado.collectAsState()
-    val lugares by vm.lugares.collectAsState()
+    // Lugares ya filtrados por categoría (los filtra el ViewModel)
+    val lugares by vm.lugaresVisibles.collectAsState()
+    val categoria by vm.categoria.collectAsState()
     val seleccionado by vm.seleccionado.collectAsState()
     val masCercano by vm.masCercano.collectAsState()
 
@@ -200,6 +206,27 @@ fun PantallaMapa(
                                 append(lugar.nombre)
                                 metros?.let { append(" (${formatearDistancia(it)})") }
                             }
+                        )
+                    }
+                }
+
+                // Mejora (Fase 2): chips para filtrar por categoría
+                LazyRow(
+                    contentPadding = PaddingValues(horizontal = 12.dp),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    item {
+                        FilterChip(
+                            selected = categoria == null,
+                            onClick = { vm.filtrarCategoria(null) },
+                            label = { Text("Todas") }
+                        )
+                    }
+                    items(vm.categorias) { cat ->
+                        FilterChip(
+                            selected = categoria == cat,
+                            onClick = { vm.filtrarCategoria(cat) },
+                            label = { Text(cat) }
                         )
                     }
                 }

@@ -15,6 +15,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
@@ -34,6 +35,37 @@ class MapaViewModel(
 
     private val _seleccionado = MutableStateFlow<Int?>(null)
     val seleccionado: StateFlow<Int?> = _seleccionado.asStateFlow()
+
+    // ---- Mejora (Fase 2): filtrar por categoría ----
+
+    /** Categorías de los lugares, sin repetir (Estudio, Comida, Eventos, Servicios). */
+    val categorias: List<String> = lugaresRepo.obtenerLugares().map { it.categoria }.distinct()
+
+    // Categoría elegida en los chips (null = todas)
+    private val _categoria = MutableStateFlow<String?>(null)
+    val categoria: StateFlow<String?> = _categoria.asStateFlow()
+
+    /** Lugares que se muestran en el mapa y en la lista, según el filtro. */
+    val lugaresVisibles: StateFlow<List<LugarConDistancia>> =
+        combine(_lugares, _categoria) { lista, cat ->
+            if (cat == null) lista else lista.filter { it.lugar.categoria == cat }
+        }.stateIn(
+            viewModelScope,
+            SharingStarted.WhileSubscribed(5000),
+            _lugares.value
+        )
+
+    /** Elige la categoría del filtro; null muestra todas. */
+    fun filtrarCategoria(cat: String?) {
+        _categoria.value = cat
+        // Si el lugar seleccionado ya no se ve, se quita la selección
+        val id = _seleccionado.value
+        if (id != null && cat != null &&
+            _lugares.value.none { it.lugar.id == id && it.lugar.categoria == cat }
+        ) {
+            _seleccionado.value = null
+        }
+    }
 
     fun buscar() {
         // Antes de buscar, revisa que el celular tenga Google Play Services
@@ -78,10 +110,10 @@ class MapaViewModel(
         _seleccionado.value = id
     }
     /**
-     * El lugar más cercano: el primero de la lista ya ordenada que tenga
-     * distancia calculada. Es null mientras no hay ubicación.
+     * El lugar más cercano: el primero de la lista ya ordenada (y filtrada)
+     * que tenga distancia calculada. Es null mientras no hay ubicación.
      */
-    val masCercano: StateFlow<Lugar?> = lugares
+    val masCercano: StateFlow<Lugar?> = lugaresVisibles
         .map { lista -> lista.firstOrNull { it.metros != null }?.lugar }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), null)
 
