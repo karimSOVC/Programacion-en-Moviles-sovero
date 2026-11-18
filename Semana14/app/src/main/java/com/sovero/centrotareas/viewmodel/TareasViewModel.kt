@@ -1,12 +1,18 @@
 package com.sovero.centrotareas.viewmodel
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.sovero.centrotareas.data.TareasRepository
 import com.sovero.centrotareas.model.CargaUi
 import com.sovero.centrotareas.model.PrimosUi
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 class TareasViewModel(private val repo: TareasRepository) : ViewModel() {
 
@@ -15,17 +21,23 @@ class TareasViewModel(private val repo: TareasRepository) : ViewModel() {
     val mensaje: StateFlow<String> = _mensaje.asStateFlow()
 
     /**
-     * Paso 1 (MAL a propósito): la espera corre en el hilo principal.
-     * Thread.sleep bloquea el hilo que dibuja la pantalla, así que nada
-     * responde durante 4 segundos y "Trabajando..." no llega a verse.
+     * Paso 2: la espera se hace en una corrutina, en segundo plano.
+     * viewModelScope.launch empieza en el hilo principal; withContext pasa
+     * la espera a Dispatchers.Default y al terminar vuelve al principal.
      */
-    fun tareaLargaMala() {
-        _mensaje.value = "Trabajando..."
-        Thread.sleep(4000)
-        _mensaje.value = "Terminó"
+    fun tareaLarga() {
+        viewModelScope.launch {
+            _mensaje.value = "Trabajando..."
+            Log.d("HILO", "Antes: ${Thread.currentThread().name}")
+            withContext(Dispatchers.Default) {
+                Log.d("HILO", "Dentro: ${Thread.currentThread().name}")
+                delay(4000)
+            }
+            Log.d("HILO", "Despues: ${Thread.currentThread().name}")
+            _mensaje.value = "Terminó"
+        }
     }
 
-    // TODO Paso 2: fun tareaLarga()
     // TODO Paso 3: progreso
     // TODO Paso 4: trabajo (Job), corriendo y cancelar()
 

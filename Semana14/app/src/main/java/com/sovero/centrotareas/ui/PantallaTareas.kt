@@ -60,11 +60,11 @@ fun PantallaTareas(vm: TareasViewModel) {
                 Button(onClick = { toques++ }) {
                     Text("Tócame: $toques")
                 }
-                Button(onClick = { vm.tareaLargaMala() }) {
-                    Text("Tarea larga (MAL)")
+                Button(onClick = { vm.tareaLarga() }) {
+                    Text("Tarea larga")
                 }
                 Text(text = mensaje)
-                // TODO Pasos 2 a 4: Tarea larga, barra, Iniciar y Cancelar
+                // TODO Pasos 3 y 4: barra, Iniciar y Cancelar
             }
             Tarjeta("Contar números primos") {
                 // TODO Paso 5: campo numérico, Contar, Cancelar y resultado
