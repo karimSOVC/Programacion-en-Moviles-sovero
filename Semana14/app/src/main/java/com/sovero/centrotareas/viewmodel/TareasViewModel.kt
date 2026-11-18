@@ -6,6 +6,7 @@ import androidx.lifecycle.viewModelScope
 import com.sovero.centrotareas.data.TareasRepository
 import com.sovero.centrotareas.model.CargaUi
 import com.sovero.centrotareas.model.PrimosUi
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
@@ -73,7 +74,37 @@ class TareasViewModel(private val repo: TareasRepository) : ViewModel() {
     // ----- Contar primos (paso 5)
     private val _primos = MutableStateFlow<PrimosUi>(PrimosUi.Inicial)
     val primos: StateFlow<PrimosUi> = _primos.asStateFlow()
-    // TODO Paso 5: fun contar(hasta: Int) y fun cancelarPrimos()
+
+    // La corrutina del cálculo, para poder cancelarla
+    private var trabajoPrimos: Job? = null
+
+    /**
+     * Paso 5: pide al Repository contar los primos hasta [hasta] y mide
+     * cuánto tardó. Si lo cancelan, el estado pasa a Cancelado.
+     */
+    fun contar(hasta: Int) {
+        // Si ya está calculando, no se lanza otro cálculo
+        if (_primos.value is PrimosUi.Calculando) return
+
+        trabajoPrimos = viewModelScope.launch {
+            _primos.value = PrimosUi.Calculando
+            val inicio = System.currentTimeMillis()
+            try {
+                val cantidad = repo.contarPrimos(hasta)
+                val ms = System.currentTimeMillis() - inicio
+                _primos.value = PrimosUi.Listo(cantidad, ms)
+            } catch (e: CancellationException) {
+                _primos.value = PrimosUi.Cancelado
+                // Se vuelve a lanzar para que la cancelación no se rompa
+                throw e
+            }
+        }
+    }
+
+    /** Detiene el cálculo de primos. */
+    fun cancelarPrimos() {
+        trabajoPrimos?.cancel()
+    }
 
     // ----- Dos cargas (pasos 6 y 7)
     private val _carga = MutableStateFlow<CargaUi>(CargaUi.Inicial)
