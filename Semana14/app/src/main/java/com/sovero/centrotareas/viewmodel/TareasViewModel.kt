@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.sovero.centrotareas.data.TareasRepository
 import com.sovero.centrotareas.model.CargaUi
+import com.sovero.centrotareas.model.ComparacionTiempos
 import com.sovero.centrotareas.model.PrimosUi
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
@@ -140,6 +141,10 @@ class TareasViewModel(private val repo: TareasRepository) : ViewModel() {
                 }
                 val ms = System.currentTimeMillis() - inicio
                 _carga.value = CargaUi.Exito("Una por una", perfil, pedidos.size, ms)
+                // Mejora (Fase 2): guarda el tiempo para la comparación
+                _comparacion.value = _comparacion.value.copy(
+                    unaPorUna = _comparacion.value.unaPorUna + ms
+                )
             } catch (e: TimeoutCancellationException) {
                 // Mejora (Fase 2): se pasó del tiempo máximo
                 _carga.value = CargaUi.Error("Tardó demasiado")
@@ -172,6 +177,10 @@ class TareasViewModel(private val repo: TareasRepository) : ViewModel() {
                 }
                 val ms = System.currentTimeMillis() - inicio
                 _carga.value = CargaUi.Exito("A la vez", perfil, pedidos.size, ms)
+                // Mejora (Fase 2): guarda el tiempo para la comparación
+                _comparacion.value = _comparacion.value.copy(
+                    aLaVez = _comparacion.value.aLaVez + ms
+                )
             } catch (e: TimeoutCancellationException) {
                 // Mejora (Fase 2): se pasó del tiempo máximo
                 _carga.value = CargaUi.Error("Tardó demasiado")
@@ -190,6 +199,16 @@ class TareasViewModel(private val repo: TareasRepository) : ViewModel() {
 
     fun cambiarSimularError(valor: Boolean) {
         _simularError.value = valor
+    }
+
+    // ---- Mejora (Fase 2): comparación de tiempos de las cargas ----
+
+    private val _comparacion = MutableStateFlow(ComparacionTiempos())
+    val comparacion: StateFlow<ComparacionTiempos> = _comparacion.asStateFlow()
+
+    /** Borra los tiempos guardados para empezar a comparar de nuevo. */
+    fun borrarTiempos() {
+        _comparacion.value = ComparacionTiempos()
     }
 
     // ---- Mejora (Fase 2): tiempo máximo de 2 s para las cargas ----

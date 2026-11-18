@@ -16,6 +16,7 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
@@ -24,6 +25,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
@@ -40,6 +42,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.sovero.centrotareas.model.CargaUi
+import com.sovero.centrotareas.model.ComparacionTiempos
 import com.sovero.centrotareas.model.PrimosUi
 import com.sovero.centrotareas.ui.theme.VerdeFondo
 import com.sovero.centrotareas.ui.theme.VerdeTexto
@@ -56,6 +59,7 @@ fun PantallaTareas(vm: TareasViewModel) {
     val carga by vm.carga.collectAsState()
     val simularError by vm.simularError.collectAsState()
     val tiempoMaximo by vm.tiempoMaximo.collectAsState()
+    val comparacion by vm.comparacion.collectAsState()
     // Texto del campo y el último N que se mandó a contar
     var textoN by rememberSaveable { mutableStateOf("500000") }
     var ultimoN by rememberSaveable { mutableIntStateOf(0) }
@@ -236,7 +240,69 @@ fun PantallaTareas(vm: TareasViewModel) {
                     }
                 }
             }
+            // Mejora (Fase 2): tabla con los tiempos de cada carga
+            Tarjeta("Comparación de tiempos") {
+                TablaTiempos(
+                    comparacion = comparacion,
+                    onBorrar = { vm.borrarTiempos() }
+                )
+            }
         }
+    }
+}
+
+/**
+ * Mejora (Fase 2): tabla con un intento por fila y el promedio al final.
+ * Solo dibuja lo que recibe; los promedios los calcula ComparacionTiempos.
+ */
+@Composable
+private fun TablaTiempos(comparacion: ComparacionTiempos, onBorrar: () -> Unit) {
+    val filas = maxOf(comparacion.unaPorUna.size, comparacion.aLaVez.size)
+    if (filas == 0) {
+        Text(
+            text = "Haz algunas cargas para comparar los tiempos",
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            textAlign = TextAlign.Center
+        )
+        return
+    }
+
+    FilaTabla("Intento", "Una por una", "A la vez", negrita = true)
+    HorizontalDivider()
+    for (i in 0 until filas) {
+        FilaTabla(
+            "${i + 1}",
+            comparacion.unaPorUna.getOrNull(i)?.let { "$it ms" } ?: "-",
+            comparacion.aLaVez.getOrNull(i)?.let { "$it ms" } ?: "-"
+        )
+    }
+    HorizontalDivider()
+    FilaTabla(
+        "Promedio",
+        comparacion.promedioUnaPorUna?.let { "$it ms" } ?: "-",
+        comparacion.promedioALaVez?.let { "$it ms" } ?: "-",
+        negrita = true
+    )
+    comparacion.ahorro?.let { ahorro ->
+        Text(
+            text = "«A la vez» ahorra $ahorro ms en promedio",
+            color = VerdeTexto,
+            fontWeight = FontWeight.Bold
+        )
+    }
+    TextButton(onClick = onBorrar) {
+        Text("Borrar tiempos")
+    }
+}
+
+/** Una fila de la tabla con tres columnas del mismo ancho. */
+@Composable
+private fun FilaTabla(col1: String, col2: String, col3: String, negrita: Boolean = false) {
+    val peso = if (negrita) FontWeight.Bold else FontWeight.Normal
+    Row(modifier = Modifier.fillMaxWidth()) {
+        Text(col1, modifier = Modifier.weight(1f), fontWeight = peso, textAlign = TextAlign.Center)
+        Text(col2, modifier = Modifier.weight(1f), fontWeight = peso, textAlign = TextAlign.Center)
+        Text(col3, modifier = Modifier.weight(1f), fontWeight = peso, textAlign = TextAlign.Center)
     }
 }
 
