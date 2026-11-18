@@ -1,0 +1,18 @@
+# PROMPTS — CampusGPS (Fase 2 · rama MEJORA-IA)
+
+Herramienta usada: **Claude Code**. En ningún prompt se pegó la clave de API de
+Maps; la clave solo está en `local.properties`, que no se sube al repositorio.
+
+| Prompt que escribí | Qué respondió la IA | Qué cambié o descarté | Por qué |
+|---|---|---|---|
+| «Compara mi app con las pantallas de diseño del PDF y dime qué no coincide.» | Encontró 5 diferencias: la app salía en modo oscuro (por el modo oscuro del celular), los dos botones estaban uno al lado del otro, la distancia de la lista no era azul, toda la línea "Más cercano" iba en negrita y la pantalla de error mostraba el mapa. | Dejé el tema siempre claro (fondo blanco y barra azul), puse "Ir al más cercano" debajo del botón principal, la distancia en azul y el error en una pantalla sin mapa con el botón de acción debajo del recuadro. Mantuve latitud y longitud aunque en el dibujo final no salen. | La guía pide los mismos elementos, orden y colores que el diseño. La latitud y longitud se quedan porque una prueba de aceptación pide verlas. |
+| «Agrega chips para filtrar los lugares por categoría (Estudio, Comida, Eventos, Servicios) en el mapa y en la lista.» | Propuso guardar la categoría elegida en el ViewModel y crear `lugaresVisibles` combinando la lista con la categoría (`combine`). La pantalla solo dibuja `FilterChip`. | Acepté la idea y además hice que el "más cercano" salga de los lugares filtrados, y que se quite la selección si el lugar elegido ya no se ve. Descarté filtrar la lista dentro del composable. | Filtrar es lógica: si lo hacía en la pantalla rompía MVVM. Así la vista solo muestra lo que recibe. |
+| «Agrega un selector de radio de 100, 200 o 500 m, un círculo alrededor de mi posición y marca en la lista los lugares que están dentro del radio.» | Propuso guardar el radio en el ViewModel, dibujar un `Circle` en el mapa y que la tarjeta compare `metros <= radio`. | Cambié la comparación: ahora el ViewModel expone `dentroDelRadio` (los ids que están dentro) y la tarjeta solo muestra "Dentro del radio". El círculo sale solo cuando ya hay ubicación. | La comparación dentro de la tarjeta era lógica en el composable. Con `dentroDelRadio` la regla queda en el ViewModel y se puede probar. |
+| «Activa el punto azul nativo del mapa y el botón de mi ubicación, solo si el permiso fue concedido.» | Propuso `MapProperties(isMyLocationEnabled = …)` y `MapUiSettings(myLocationButtonEnabled = …)` con un valor que diga si hay permiso. | Agregué que el permiso se vuelva a revisar al pulsar el botón, porque si el usuario lo da desde Ajustes la app no se enteraba. No pasé el `Context` al ViewModel: el permiso se revisa en la pantalla. | Activar el punto azul sin permiso hace que Google lance un error. El permiso es de Android y se pide desde la vista, como en el Paso 2. |
+
+## Qué aprendí
+
+- La IA a veces propone poner lógica en el composable porque "funciona". Hay que
+  revisar dónde queda cada cosa: filtrar y comparar distancias va en el ViewModel.
+- `combine` sirve para mezclar varios estados (lista, categoría, radio) en uno solo.
+- El punto azul y el permiso están unidos: sin permiso, no se puede activar.
