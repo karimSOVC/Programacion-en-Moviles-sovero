@@ -81,6 +81,16 @@ principal no atiende un toque durante unos 5 segundos.
 5. **Error:** con «Simular error» activado sale «No se pudo cargar: Sin conexión» y el
    botón Reintentar. La app no se cierra.
 
+## Fase 2 · Mejoras con IA (rama MEJORA-IA)
+
+| Mejora | Qué hace | Capas |
+|---|---|---|
+| Tiempo máximo | Con el interruptor «Tiempo máximo 2 s», las cargas se cortan con `withTimeout(2000)` y sale «Tardó demasiado» con Reintentar. | ViewModel + View |
+| Primos con progreso | Mientras cuenta, se ven una barra y el porcentaje. Al cancelar dice en qué porcentaje se quedó. | Repository + ViewModel + View |
+| Comparación de tiempos | Una tarjeta nueva con la tabla de tiempos de cada intento, el promedio de cada modo y cuánto ahorra «A la vez». | Model + ViewModel + View |
+
+Los prompts usados y qué cambié de cada respuesta están en [PROMPTS.md](PROMPTS.md).
+
 ## Para pensar
 
 **1. ¿Por qué no se veía «Trabajando...» en el Paso 1?**
