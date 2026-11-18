@@ -88,10 +88,11 @@ principal no atiende un toque durante unos 5 segundos.
 | Tiempo máximo | Con el interruptor «Tiempo máximo 2 s», las cargas se cortan con `withTimeout(2000)` y sale «Tardó demasiado» con Reintentar. | ViewModel + View |
 | Primos con progreso | Mientras cuenta, se ven una barra y el porcentaje. Al cancelar dice en qué porcentaje se quedó. | Repository + ViewModel + View |
 | Comparación de tiempos | Una tarjeta nueva con la tabla de tiempos de cada intento, el promedio de cada modo y cuánto ahorra «A la vez». | Model + ViewModel + View |
+| Reintentos con espera creciente | Si una carga falla, se vuelve a intentar hasta 3 veces esperando 500 ms, 1 s y 2 s. Recién después sale el error. | ViewModel + View |
 
-| Tiempo máximo | Primos con progreso | Primos cancelado y comparación de tiempos |
-|---|---|---|
-| ![Tardó demasiado](docs/capturas/06-tardo-demasiado.png) | ![Primos con progreso](docs/capturas/07-primos-progreso.png) | ![Comparación de tiempos](docs/capturas/08-comparacion-tiempos.png) |
+| Tiempo máximo | Primos con progreso | Primos cancelado y comparación de tiempos | Reintentos |
+|---|---|---|---|
+| ![Tardó demasiado](docs/capturas/06-tardo-demasiado.png) | ![Primos con progreso](docs/capturas/07-primos-progreso.png) | ![Comparación de tiempos](docs/capturas/08-comparacion-tiempos.png) | ![Reintentos](docs/capturas/09-reintentos.png) |
 
 - **Tiempo máximo:** con «Tiempo máximo 2 s» activado y «Simular error» apagado,
   «A la vez» se corta a los 2 s y sale «Tardó demasiado» con Reintentar.
@@ -99,6 +100,9 @@ principal no atiende un toque durante unos 5 segundos.
   Contar está deshabilitado y Cancelar habilitado.
 - **Primos cancelado y comparación:** al cancelar dice «Cancelado en 2 %». Abajo, la
   tabla guarda el intento de «A la vez» (3001 ms) y su promedio.
+- **Reintentos:** con «Simular error» activado, la carga falla y la app lo vuelve a
+  intentar sola: debajo de la ruedita dice «Falló. Reintento 1 de 3...». Los botones
+  quedan deshabilitados mientras tanto.
 
 Los prompts usados y qué cambié de cada respuesta están en [PROMPTS.md](PROMPTS.md).
 
