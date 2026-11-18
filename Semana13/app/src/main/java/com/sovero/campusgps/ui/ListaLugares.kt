@@ -44,7 +44,8 @@ fun ListaLugares(
     seleccionado: Int?,
     onClick: (Int) -> Unit,
     modifier: Modifier = Modifier,
-    masCercanoId: Int? = null
+    masCercanoId: Int? = null,
+    dentroDelRadio: Set<Int> = emptySet()
 ) {
     LazyColumn(
         modifier = modifier,
@@ -94,6 +95,15 @@ fun ListaLugares(
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
+                        // Mejora (Fase 2): marca si el lugar está dentro del radio
+                        if (item.lugar.id in dentroDelRadio) {
+                            Text(
+                                text = "Dentro del radio",
+                                style = MaterialTheme.typography.labelSmall,
+                                color = VerdeMarcador,
+                                fontWeight = FontWeight.Bold
+                            )
+                        }
                     }
                     // Distancia a la derecha; "Sin calcular" si aún no hay ubicación
                     Text(

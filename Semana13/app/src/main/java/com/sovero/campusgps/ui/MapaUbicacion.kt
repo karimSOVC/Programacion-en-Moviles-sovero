@@ -4,10 +4,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.key
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import com.google.android.gms.maps.CameraUpdateFactory
 import com.google.android.gms.maps.model.BitmapDescriptorFactory
 import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
+import com.google.maps.android.compose.Circle
 import com.google.maps.android.compose.GoogleMap
 import com.google.maps.android.compose.Marker
 import com.google.maps.android.compose.rememberCameraPositionState
@@ -27,7 +29,8 @@ fun MapaUbicacion(
     lugares: List<LugarConDistancia>,
     seleccionado: Int?,
     modifier: Modifier = Modifier,
-    masCercanoId: Int? = null
+    masCercanoId: Int? = null,
+    radioMetros: Int? = null
 ) {
     // Cámara inicial: Lima, zoom 12
     val camara = rememberCameraPositionState {
@@ -60,6 +63,16 @@ fun MapaUbicacion(
                 ),
                 title = "Estás aquí"
             )
+            // Mejora (Fase 2): círculo del radio de cercanía alrededor de mí
+            if (radioMetros != null) {
+                Circle(
+                    center = LatLng(estado.posicion.latitud, estado.posicion.longitud),
+                    radius = radioMetros.toDouble(),
+                    strokeColor = Color(0xFF1565C0),
+                    strokeWidth = 4f,
+                    fillColor = Color(0x331565C0)
+                )
+            }
         }
         // Un marcador azul por cada lugar del campus (nombre y categoría)
         lugares.forEach { item ->

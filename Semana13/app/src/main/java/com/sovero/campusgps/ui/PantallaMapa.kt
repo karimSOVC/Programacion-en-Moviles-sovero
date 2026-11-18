@@ -10,6 +10,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -59,6 +60,8 @@ fun PantallaMapa(
     // Lugares ya filtrados por categoría (los filtra el ViewModel)
     val lugares by vm.lugaresVisibles.collectAsState()
     val categoria by vm.categoria.collectAsState()
+    val radio by vm.radio.collectAsState()
+    val dentroDelRadio by vm.dentroDelRadio.collectAsState()
     val seleccionado by vm.seleccionado.collectAsState()
     val masCercano by vm.masCercano.collectAsState()
 
@@ -149,6 +152,7 @@ fun PantallaMapa(
                     lugares = lugares,
                     seleccionado = seleccionado,
                     masCercanoId = masCercano?.id,
+                    radioMetros = radio,
                     modifier = Modifier
                         .weight(1f)
                         .fillMaxWidth()
@@ -231,11 +235,28 @@ fun PantallaMapa(
                     }
                 }
 
+                // Mejora (Fase 2): selector del radio de cercanía
+                Row(
+                    modifier = Modifier.padding(horizontal = 12.dp),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text("Radio:", fontWeight = FontWeight.Bold)
+                    vm.radios.forEach { metros ->
+                        FilterChip(
+                            selected = radio == metros,
+                            onClick = { vm.cambiarRadio(metros) },
+                            label = { Text("$metros m") }
+                        )
+                    }
+                }
+
                 // Lista de lugares con altura fija debajo del mapa
                 ListaLugares(
                     lugares = lugares,
                     seleccionado = seleccionado,
                     masCercanoId = masCercano?.id,
+                    dentroDelRadio = dentroDelRadio,
                     onClick = { id -> vm.seleccionar(id) },
                     modifier = Modifier
                         .fillMaxWidth()
