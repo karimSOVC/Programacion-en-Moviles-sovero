@@ -98,7 +98,8 @@ fun ListaLugares(
                     // Distancia a la derecha; "Sin calcular" si aún no hay ubicación
                     Text(
                         text = item.metros?.let { formatearDistancia(it) } ?: "Sin calcular",
-                        fontWeight = FontWeight.SemiBold
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.primary
                     )
                 }
             }

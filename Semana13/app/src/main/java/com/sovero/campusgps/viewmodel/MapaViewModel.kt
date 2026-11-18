@@ -92,7 +92,7 @@ class MapaViewModel(
             TipoError.SIN_PERMISO
         )
         is UbicacionNoDisponibleException -> UbicacionUi.Error(
-            "Activa el GPS e intenta de nuevo",
+            "No se pudo obtener la ubicación. Activa el GPS e intenta de nuevo",
             TipoError.GPS_APAGADO
         )
         else -> UbicacionUi.Error(
