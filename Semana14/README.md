@@ -89,10 +89,12 @@ principal no atiende un toque durante unos 5 segundos.
 | Primos con progreso | Mientras cuenta, se ven una barra y el porcentaje. Al cancelar dice en qué porcentaje se quedó. | Repository + ViewModel + View |
 | Comparación de tiempos | Una tarjeta nueva con la tabla de tiempos de cada intento, el promedio de cada modo y cuánto ahorra «A la vez». | Model + ViewModel + View |
 
-| Primos con progreso | Primos cancelado y comparación de tiempos |
-|---|---|
-| ![Primos con progreso](docs/capturas/07-primos-progreso.png) | ![Comparación de tiempos](docs/capturas/08-comparacion-tiempos.png) |
+| Tiempo máximo | Primos con progreso | Primos cancelado y comparación de tiempos |
+|---|---|---|
+| ![Tardó demasiado](docs/capturas/06-tardo-demasiado.png) | ![Primos con progreso](docs/capturas/07-primos-progreso.png) | ![Comparación de tiempos](docs/capturas/08-comparacion-tiempos.png) |
 
+- **Tiempo máximo:** con «Tiempo máximo 2 s» activado y «Simular error» apagado,
+  «A la vez» se corta a los 2 s y sale «Tardó demasiado» con Reintentar.
 - **Primos con progreso:** con N = 500 000 000 la barra avanza y dice «Calculando... 2 %».
   Contar está deshabilitado y Cancelar habilitado.
 - **Primos cancelado y comparación:** al cancelar dice «Cancelado en 2 %». Abajo, la
