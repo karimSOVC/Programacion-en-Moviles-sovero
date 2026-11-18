@@ -21,6 +21,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
+import androidx.compose.material3.Switch
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -36,6 +37,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.sovero.centrotareas.model.CargaUi
 import com.sovero.centrotareas.model.PrimosUi
@@ -51,6 +53,7 @@ fun PantallaTareas(vm: TareasViewModel) {
     val corriendo by vm.corriendo.collectAsState()
     val primos by vm.primos.collectAsState()
     val carga by vm.carga.collectAsState()
+    val simularError by vm.simularError.collectAsState()
     // Texto del campo y el último N que se mandó a contar
     var textoN by rememberSaveable { mutableStateOf("500000") }
     var ultimoN by rememberSaveable { mutableIntStateOf(0) }
@@ -152,8 +155,18 @@ fun PantallaTareas(vm: TareasViewModel) {
                 }
             }
             Tarjeta("Dos cargas") {
-                // TODO Paso 7: Simular error
                 val cargando = carga is CargaUi.Cargando
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    Switch(
+                        checked = simularError,
+                        onCheckedChange = { vm.cambiarSimularError(it) }
+                    )
+                    Text("Simular error")
+                }
                 // Mientras carga, los dos botones se deshabilitan
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     OutlinedButton(
@@ -182,8 +195,24 @@ fun PantallaTareas(vm: TareasViewModel) {
                         Text(text = "Pedidos: ${estado.pedidos}", color = VerdeTexto)
                         Text(text = "Tiempo: ${estado.milisegundos} ms", color = VerdeTexto)
                     }
-                    // TODO Paso 7: recuadro de error y Reintentar
-                    is CargaUi.Error -> {}
+                    is CargaUi.Error -> {
+                        Surface(
+                            color = MaterialTheme.colorScheme.errorContainer,
+                            shape = RoundedCornerShape(12.dp),
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Text(
+                                text = estado.mensaje,
+                                color = MaterialTheme.colorScheme.onErrorContainer,
+                                textAlign = TextAlign.Center,
+                                modifier = Modifier.padding(12.dp)
+                            )
+                        }
+                        // Reintentar vuelve a hacer la carga "A la vez"
+                        OutlinedButton(onClick = { vm.cargarALaVez() }) {
+                            Text("Reintentar")
+                        }
+                    }
                 }
             }
         }
