@@ -23,13 +23,22 @@ class TareasRepositoryLocal : TareasRepository {
      * Paso 5: cuenta los primos de 2 a [hasta]. Es un cálculo pesado, así que
      * corre en Dispatchers.Default (hilos pensados para usar el procesador).
      */
-    override suspend fun contarPrimos(hasta: Int): Int = withContext(Dispatchers.Default) {
+    override suspend fun contarPrimos(
+        hasta: Int,
+        alAvanzar: (Float) -> Unit
+    ): Int = withContext(Dispatchers.Default) {
         var cantidad = 0
+        // Mejora (Fase 2): avisa el avance cada 1 % (no en cada número,
+        // para no llenar la pantalla de actualizaciones)
+        val paso = maxOf(hasta / 100, 1)
+        alAvanzar(0f)
         for (n in 2..hasta) {
             // Si cancelaron la corrutina, aquí se detiene el cálculo
             ensureActive()
             if (esPrimo(n)) cantidad++
+            if (n % paso == 0) alAvanzar(n.toFloat() / hasta)
         }
+        alAvanzar(1f)
         cantidad
     }
 
