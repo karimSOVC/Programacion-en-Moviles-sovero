@@ -9,6 +9,8 @@ import com.sovero.centrotareas.model.PrimosUi
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.async
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -109,6 +111,43 @@ class TareasViewModel(private val repo: TareasRepository) : ViewModel() {
     // ----- Dos cargas (pasos 6 y 7)
     private val _carga = MutableStateFlow<CargaUi>(CargaUi.Inicial)
     val carga: StateFlow<CargaUi> = _carga.asStateFlow()
-    // TODO Paso 6: fun cargarUnaPorUna() y fun cargarALaVez()
+
+    /**
+     * Paso 6: primero el perfil (2 s) y después los pedidos (3 s).
+     * Como una espera a la otra, tarda ≈ 5 s.
+     */
+    fun cargarUnaPorUna() {
+        if (_carga.value is CargaUi.Cargando) return
+
+        viewModelScope.launch {
+            _carga.value = CargaUi.Cargando
+            val inicio = System.currentTimeMillis()
+            val perfil = repo.cargarPerfil()
+            val pedidos = repo.cargarPedidos(false)
+            val ms = System.currentTimeMillis() - inicio
+            _carga.value = CargaUi.Exito("Una por una", perfil, pedidos.size, ms)
+        }
+    }
+
+    /**
+     * Paso 6: las dos cargas empiezan al mismo tiempo con async y se
+     * espera a las dos con await(). Tarda lo que la más lenta: ≈ 3 s.
+     */
+    fun cargarALaVez() {
+        if (_carga.value is CargaUi.Cargando) return
+
+        viewModelScope.launch {
+            _carga.value = CargaUi.Cargando
+            val inicio = System.currentTimeMillis()
+            val (perfil, pedidos) = coroutineScope {
+                val a = async { repo.cargarPerfil() }
+                val b = async { repo.cargarPedidos(false) }
+                Pair(a.await(), b.await())
+            }
+            val ms = System.currentTimeMillis() - inicio
+            _carga.value = CargaUi.Exito("A la vez", perfil, pedidos.size, ms)
+        }
+    }
+
     // TODO Paso 7: simularError y manejo de errores
 }
