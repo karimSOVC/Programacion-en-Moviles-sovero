@@ -36,6 +36,29 @@ distancia, ordenados del más cercano al más lejano.
 |---|---|
 | ![Lista](docs/capturas/04-lista.png) | ![Error](docs/capturas/05-error.png) |
 
+## Fase 2 · Mejoras con IA (rama MEJORA-IA)
+
+| Mejora | Qué hace | Capas |
+|---|---|---|
+| Diseño igual a la guía | Tema siempre claro, botones uno debajo del otro, distancia en azul y error sin mapa. | View |
+| Filtrar por categoría | Chips Todas, Estudio, Comida, Eventos y Servicios; el ViewModel filtra con `combine` y el mapa y la lista muestran solo esos lugares. | ViewModel + View |
+| Radio de cercanía | Chips de 100, 200 y 500 m; un `Circle` alrededor de tu posición y la etiqueta «Dentro del radio» en la lista. | ViewModel + View |
+| Punto azul nativo | `isMyLocationEnabled` y el botón de mi ubicación del mapa, solo si el permiso fue concedido. | View |
+| Seguimiento en vivo | `requestLocationUpdates` convertido en un `Flow` con `callbackFlow`; botones Iniciar / Detener seguimiento. | Repository + ViewModel + View |
+
+| Lista y selección | Radio y círculo | Seguimiento en vivo |
+|---|---|---|
+| ![Lista](docs/capturas/04-lista.png) | ![Radio](docs/capturas/06-radio-circulo.png) | ![Seguimiento](docs/capturas/07-seguimiento.png) |
+
+- **Lista y selección:** al tocar «Cafetería Campus» la tarjeta queda resaltada y el
+  mapa muestra su nombre. Arriba se ven los chips de categoría y de radio.
+- **Radio y círculo:** con 200 m elegido se dibuja el círculo azul alrededor de mi
+  posición.
+- **Seguimiento en vivo:** el botón cambia a «Detener seguimiento» y el mapa sigue mi
+  posición con el punto azul.
+
+Los prompts usados y qué cambié de cada respuesta están en [PROMPTS.md](PROMPTS.md).
+
 ## Estructura de paquetes
 
 ```text
@@ -44,7 +67,7 @@ com.sovero.campusgps/
 ├── model/
 │   └── Modelos.kt                    Posicion, Lugar, LugarConDistancia, UbicacionUi, TipoError
 ├── data/
-│   ├── UbicacionRepository.kt        interface (+ playServicesDisponible)
+│   ├── UbicacionRepository.kt        interface (+ playServicesDisponible, seguirPosicion)
 │   ├── UbicacionRepositoryGoogle.kt  implementación con FusedLocationProviderClient
 │   ├── LugaresRepository.kt          interface
 │   └── LugaresRepositoryLocal.kt     los 5 lugares ficticios
