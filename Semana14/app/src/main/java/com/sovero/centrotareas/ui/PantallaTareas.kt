@@ -12,6 +12,7 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -33,6 +34,7 @@ import com.sovero.centrotareas.viewmodel.TareasViewModel
 @Composable
 fun PantallaTareas(vm: TareasViewModel) {
     val mensaje by vm.mensaje.collectAsState()
+    val progreso by vm.progreso.collectAsState()
     // Contador de toques: es solo de la pantalla
     var toques by rememberSaveable { mutableIntStateOf(0) }
 
@@ -61,10 +63,18 @@ fun PantallaTareas(vm: TareasViewModel) {
                     Text("Tócame: $toques")
                 }
                 Button(onClick = { vm.tareaLarga() }) {
-                    Text("Tarea larga")
+                    Text("Iniciar")
                 }
+                // TODO Paso 4: Cancelar
+                LinearProgressIndicator(
+                    progress = { progreso },
+                    modifier = Modifier.fillMaxWidth()
+                )
+                Text(
+                    text = "${(progreso * 100).toInt()} %",
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
                 Text(text = mensaje)
-                // TODO Pasos 3 y 4: barra, Iniciar y Cancelar
             }
             Tarjeta("Contar números primos") {
                 // TODO Paso 5: campo numérico, Contar, Cancelar y resultado
