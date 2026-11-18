@@ -134,10 +134,12 @@ class TareasViewModel(private val repo: TareasRepository) : ViewModel() {
             _carga.value = CargaUi.Cargando
             val inicio = System.currentTimeMillis()
             try {
-                val (perfil, pedidos) = conLimite {
-                    val perfil = repo.cargarPerfil()
-                    val pedidos = repo.cargarPedidos(_simularError.value)
-                    Pair(perfil, pedidos)
+                val (perfil, pedidos) = conReintentos {
+                    conLimite {
+                        val perfil = repo.cargarPerfil()
+                        val pedidos = repo.cargarPedidos(_simularError.value)
+                        Pair(perfil, pedidos)
+                    }
                 }
                 val ms = System.currentTimeMillis() - inicio
                 _carga.value = CargaUi.Exito("Una por una", perfil, pedidos.size, ms)
@@ -152,7 +154,11 @@ class TareasViewModel(private val repo: TareasRepository) : ViewModel() {
                 // La cancelación no es un error: se deja pasar
                 throw e
             } catch (e: Exception) {
-                _carga.value = CargaUi.Error("No se pudo cargar: " + e.message)
+                _carga.value = CargaUi.Error(
+                    "No se pudo cargar: " + e.message + " (después de $MAX_REINTENTOS reintentos)"
+                )
+            } finally {
+                _reintento.value = 0
             }
         }
     }
@@ -168,11 +174,13 @@ class TareasViewModel(private val repo: TareasRepository) : ViewModel() {
             _carga.value = CargaUi.Cargando
             val inicio = System.currentTimeMillis()
             try {
-                val (perfil, pedidos) = conLimite {
-                    coroutineScope {
-                        val a = async { repo.cargarPerfil() }
-                        val b = async { repo.cargarPedidos(_simularError.value) }
-                        Pair(a.await(), b.await())
+                val (perfil, pedidos) = conReintentos {
+                    conLimite {
+                        coroutineScope {
+                            val a = async { repo.cargarPerfil() }
+                            val b = async { repo.cargarPedidos(_simularError.value) }
+                            Pair(a.await(), b.await())
+                        }
                     }
                 }
                 val ms = System.currentTimeMillis() - inicio
@@ -188,7 +196,11 @@ class TareasViewModel(private val repo: TareasRepository) : ViewModel() {
                 // La cancelación no es un error: se deja pasar
                 throw e
             } catch (e: Exception) {
-                _carga.value = CargaUi.Error("No se pudo cargar: " + e.message)
+                _carga.value = CargaUi.Error(
+                    "No se pudo cargar: " + e.message + " (después de $MAX_REINTENTOS reintentos)"
+                )
+            } finally {
+                _reintento.value = 0
             }
         }
     }
@@ -220,6 +232,35 @@ class TareasViewModel(private val repo: TareasRepository) : ViewModel() {
         _tiempoMaximo.value = valor
     }
 
+    // ---- Mejora (Fase 2): reintentos con espera creciente ----
+
+    // 0 = primer intento; 1, 2 o 3 = número de reintento en curso
+    private val _reintento = MutableStateFlow(0)
+    val reintento: StateFlow<Int> = _reintento.asStateFlow()
+
+    /**
+     * Si [bloque] falla, espera y lo vuelve a intentar hasta
+     * MAX_REINTENTOS veces. Cada espera es el doble de la anterior
+     * (500 ms, 1 s, 2 s). Si falla también el último, se lanza el error.
+     */
+    private suspend fun <T> conReintentos(bloque: suspend () -> T): T {
+        var espera = 500L
+        for (n in 1..MAX_REINTENTOS) {
+            try {
+                return bloque()
+            } catch (e: CancellationException) {
+                // Cancelar o pasarse del tiempo máximo no se reintenta
+                throw e
+            } catch (e: Exception) {
+                _reintento.value = n
+                delay(espera)
+                espera *= 2
+            }
+        }
+        // Último intento: si falla, el error sale hacia el catch de la carga
+        return bloque()
+    }
+
     /**
      * Si el interruptor está activado, corta [bloque] a los 2 s con
      * withTimeout (lanza TimeoutCancellationException). Si no, lo deja
@@ -231,5 +272,10 @@ class TareasViewModel(private val repo: TareasRepository) : ViewModel() {
         } else {
             bloque()
         }
+    }
+
+    companion object {
+        // Cuántas veces se reintenta una carga antes de mostrar el error
+        const val MAX_REINTENTOS = 3
     }
 }

@@ -60,6 +60,7 @@ fun PantallaTareas(vm: TareasViewModel) {
     val simularError by vm.simularError.collectAsState()
     val tiempoMaximo by vm.tiempoMaximo.collectAsState()
     val comparacion by vm.comparacion.collectAsState()
+    val reintento by vm.reintento.collectAsState()
     // Texto del campo y el último N que se mandó a contar
     var textoN by rememberSaveable { mutableStateOf("500000") }
     var ultimoN by rememberSaveable { mutableIntStateOf(0) }
@@ -209,7 +210,16 @@ fun PantallaTareas(vm: TareasViewModel) {
                 }
                 when (val estado = carga) {
                     CargaUi.Inicial -> {}
-                    CargaUi.Cargando -> CircularProgressIndicator()
+                    CargaUi.Cargando -> {
+                        CircularProgressIndicator()
+                        // Mejora (Fase 2): avisa en qué reintento va
+                        if (reintento > 0) {
+                            Text(
+                                text = "Falló. Reintento $reintento de ${TareasViewModel.MAX_REINTENTOS}...",
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                    }
                     is CargaUi.Exito -> RecuadroVerde {
                         Text(
                             text = "Modo: ${estado.modo}",
