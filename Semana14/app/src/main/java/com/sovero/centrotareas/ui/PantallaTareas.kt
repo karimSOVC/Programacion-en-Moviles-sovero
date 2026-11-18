@@ -54,6 +54,7 @@ fun PantallaTareas(vm: TareasViewModel) {
     val primos by vm.primos.collectAsState()
     val carga by vm.carga.collectAsState()
     val simularError by vm.simularError.collectAsState()
+    val tiempoMaximo by vm.tiempoMaximo.collectAsState()
     // Texto del campo y el último N que se mandó a contar
     var textoN by rememberSaveable { mutableStateOf("500000") }
     var ultimoN by rememberSaveable { mutableIntStateOf(0) }
@@ -166,6 +167,18 @@ fun PantallaTareas(vm: TareasViewModel) {
                         onCheckedChange = { vm.cambiarSimularError(it) }
                     )
                     Text("Simular error")
+                }
+                // Mejora (Fase 2): cortar las cargas a los 2 s
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    Switch(
+                        checked = tiempoMaximo,
+                        onCheckedChange = { vm.cambiarTiempoMaximo(it) }
+                    )
+                    Text("Tiempo máximo 2 s")
                 }
                 // Mientras carga, los dos botones se deshabilitan
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
