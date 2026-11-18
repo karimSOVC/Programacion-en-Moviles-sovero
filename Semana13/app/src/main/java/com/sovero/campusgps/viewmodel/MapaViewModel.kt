@@ -11,6 +11,8 @@ import com.sovero.campusgps.model.Posicion
 import com.sovero.campusgps.model.TipoError
 import com.sovero.campusgps.model.UbicacionUi
 import com.sovero.campusgps.util.distanciaMetros
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -107,6 +109,49 @@ class MapaViewModel(
                 }
                 .onFailure { _estado.value = errorDe(it) }
         }
+    }
+
+    // ---- Mejora (Fase 2): seguimiento en vivo ----
+
+    // La corrutina que escucha el Flow de posiciones, para poder detenerla
+    private var trabajoSeguimiento: Job? = null
+
+    // true mientras se sigue la ubicación en vivo
+    private val _siguiendo = MutableStateFlow(false)
+    val siguiendo: StateFlow<Boolean> = _siguiendo.asStateFlow()
+
+    /** Escucha las posiciones nuevas y actualiza el mapa y las distancias. */
+    fun iniciarSeguimiento() {
+        if (_siguiendo.value) return
+        if (!ubicacionRepo.playServicesDisponible()) {
+            _estado.value = UbicacionUi.Error(
+                "Este dispositivo no tiene Google Play Services",
+                TipoError.SIN_PLAY_SERVICES
+            )
+            return
+        }
+
+        trabajoSeguimiento = viewModelScope.launch {
+            _siguiendo.value = true
+            try {
+                ubicacionRepo.seguirPosicion().collect { pos ->
+                    _estado.value = UbicacionUi.Lista(pos)
+                    actualizarDistancias(pos)
+                }
+            } catch (e: CancellationException) {
+                // Detener no es un error: se deja pasar la cancelación
+                throw e
+            } catch (e: Exception) {
+                _estado.value = errorDe(e)
+            } finally {
+                _siguiendo.value = false
+            }
+        }
+    }
+
+    /** Deja de escuchar: el Repository apaga las actualizaciones del GPS. */
+    fun detenerSeguimiento() {
+        trabajoSeguimiento?.cancel()
     }
 
     fun permisoDenegado() {

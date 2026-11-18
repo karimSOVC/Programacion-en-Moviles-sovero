@@ -67,6 +67,7 @@ fun PantallaMapa(
     val dentroDelRadio by vm.dentroDelRadio.collectAsState()
     val seleccionado by vm.seleccionado.collectAsState()
     val masCercano by vm.masCercano.collectAsState()
+    val siguiendo by vm.siguiendo.collectAsState()
 
     // ---- Permiso de ubicación en tiempo de ejecución ----
     val contexto = LocalContext.current
@@ -196,6 +197,22 @@ fun PantallaMapa(
                         enabled = masCercano != null
                     ) {
                         Text("Ir al más cercano")
+                    }
+                    // Mejora (Fase 2): seguimiento en vivo, Iniciar / Detener
+                    if (siguiendo) {
+                        Button(onClick = { vm.detenerSeguimiento() }) {
+                            Text("Detener seguimiento")
+                        }
+                    } else {
+                        OutlinedButton(
+                            onClick = {
+                                permisoConcedido = hayPermiso()
+                                // Sin permiso, primero se pide (igual que el botón principal)
+                                if (permisoConcedido) vm.iniciarSeguimiento() else alPulsar()
+                            }
+                        ) {
+                            Text("Iniciar seguimiento en vivo")
+                        }
                     }
 
                     when (e) {
