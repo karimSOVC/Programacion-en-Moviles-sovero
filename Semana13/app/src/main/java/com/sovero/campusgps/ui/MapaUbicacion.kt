@@ -11,6 +11,8 @@ import com.google.android.gms.maps.model.CameraPosition
 import com.google.android.gms.maps.model.LatLng
 import com.google.maps.android.compose.Circle
 import com.google.maps.android.compose.GoogleMap
+import com.google.maps.android.compose.MapProperties
+import com.google.maps.android.compose.MapUiSettings
 import com.google.maps.android.compose.Marker
 import com.google.maps.android.compose.rememberCameraPositionState
 import com.google.maps.android.compose.rememberUpdatedMarkerState
@@ -30,7 +32,8 @@ fun MapaUbicacion(
     seleccionado: Int?,
     modifier: Modifier = Modifier,
     masCercanoId: Int? = null,
-    radioMetros: Int? = null
+    radioMetros: Int? = null,
+    permisoConcedido: Boolean = false
 ) {
     // Cámara inicial: Lima, zoom 12
     val camara = rememberCameraPositionState {
@@ -54,7 +57,14 @@ fun MapaUbicacion(
         }
     }
 
-    GoogleMap(modifier = modifier, cameraPositionState = camara) {
+    GoogleMap(
+        modifier = modifier,
+        cameraPositionState = camara,
+        // Mejora (Fase 2): punto azul nativo y botón "mi ubicación",
+        // solo si el permiso fue concedido (si no, Google lanza un error)
+        properties = MapProperties(isMyLocationEnabled = permisoConcedido),
+        uiSettings = MapUiSettings(myLocationButtonEnabled = permisoConcedido)
+    ) {
         // Marcador rojo (el de por defecto) con mi posición
         if (estado is UbicacionUi.Lista) {
             Marker(

@@ -30,6 +30,9 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -67,10 +70,22 @@ fun PantallaMapa(
 
     // ---- Permiso de ubicación en tiempo de ejecución ----
     val contexto = LocalContext.current
+
+    // true si ya hay permiso FINE o COARSE (se usa para el punto azul del mapa)
+    fun hayPermiso(): Boolean =
+        ContextCompat.checkSelfPermission(
+            contexto, Manifest.permission.ACCESS_FINE_LOCATION
+        ) == PackageManager.PERMISSION_GRANTED ||
+            ContextCompat.checkSelfPermission(
+                contexto, Manifest.permission.ACCESS_COARSE_LOCATION
+            ) == PackageManager.PERMISSION_GRANTED
+
+    var permisoConcedido by remember { mutableStateOf(hayPermiso()) }
     val lanzador = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestMultiplePermissions()
     ) { resultado ->
         // Si concedió FINE o COARSE, busca; si no, avisa sin cerrar la app
+        permisoConcedido = resultado.values.any { it }
         if (resultado.values.any { it }) {
             vm.buscar()
         } else {
@@ -79,6 +94,8 @@ fun PantallaMapa(
     }
 
     fun alPulsar() {
+        // Por si el permiso se dio desde Ajustes, se vuelve a revisar
+        permisoConcedido = hayPermiso()
         val tieneFine = ContextCompat.checkSelfPermission(
             contexto, Manifest.permission.ACCESS_FINE_LOCATION
         ) == PackageManager.PERMISSION_GRANTED
@@ -153,6 +170,7 @@ fun PantallaMapa(
                     seleccionado = seleccionado,
                     masCercanoId = masCercano?.id,
                     radioMetros = radio,
+                    permisoConcedido = permisoConcedido,
                     modifier = Modifier
                         .weight(1f)
                         .fillMaxWidth()
