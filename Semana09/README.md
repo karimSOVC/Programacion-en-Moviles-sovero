@@ -37,6 +37,19 @@ app no se cierra.
 |---|---|---|
 | ![Crear formulario](docs/capturas/04-crear-formulario.png) | ![Crear publicado](docs/capturas/04-crear-publicado.png) | ![Error](docs/capturas/05-error.png) |
 
+## Fase 2 · Mejoras con IA (rama MEJORA-IA)
+
+| Mejora | Qué hace | Capas |
+|---|---|---|
+| Encabezado con interceptor | Un `Interceptor` de OkHttp agrega `Accept: application/json` a todas las peticiones. | RetrofitClient |
+| Búsqueda | Campo «Buscar por título» que filtra las publicaciones ya descargadas. | ViewModel + View |
+| Paginación simple | Carga de 20 en 20 con `@Query("_start")` y `@Query("_limit")` y el botón **Cargar más**. | API + Repository + ViewModel + View |
+| Borrar publicación | Botón **Eliminar** en el detalle con `@DELETE("posts/{id}")`; revisa el código con `Response<Unit>` y muestra «Publicación eliminada (código 200)». | API + Repository + ViewModel + View |
+| Editar con PATCH | Pantalla **Editar título** con `@PATCH("posts/{id}")` que muestra la respuesta del servidor. | API + Repository + ViewModel + View |
+| Caché en Room | Guarda las publicaciones en Room; sin internet muestra las guardadas con el aviso «Sin internet: mostrando publicaciones guardadas». El Repository decide si usa la red o la base de datos. | Repository + Room |
+
+Los prompts usados y qué cambié de cada respuesta están en [PROMPTS.md](PROMPTS.md).
+
 ## Estructura de paquetes
 
 ```text
@@ -45,6 +58,7 @@ com.sovero.murocampus/
 ├── model/
 │   └── Modelos.kt                  Post, Comentario, NuevoPost (+ Usuario del ejemplo)
 ├── data/
+│   ├── local/                      (Fase 2) PostEntity, PostDao y MuroDatabase de Room
 │   ├── remote/
 │   │   ├── PostApi.kt              interface de Retrofit (+ UsuarioApi)
 │   │   └── RetrofitClient.kt       Retrofit + OkHttp + conversor JSON
@@ -59,6 +73,7 @@ com.sovero.murocampus/
     ├── PantallaLista.kt
     ├── PantallaDetalle.kt
     ├── PantallaCrear.kt
+    ├── PantallaEditar.kt           (Fase 2) editar el título con PATCH
     └── theme/
 ```
 
