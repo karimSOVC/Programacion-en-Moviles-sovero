@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.sovero.murocampus.data.PostRepository
 import com.sovero.murocampus.model.Comentario
+import com.sovero.murocampus.model.NuevoPost
 import com.sovero.murocampus.model.Post
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
@@ -77,6 +78,26 @@ class PostsViewModel(private val repo: PostRepository) : ViewModel() {
             }
             _detalle.value = UiState.Exito(DetalleUi(post, comentarios))
         }
+    }
+
+    // ----- Crear publicación (paso 9): null = todavía no se envió
+    private val _creacion = MutableStateFlow<UiState<Post>?>(null)
+    val creacion: StateFlow<UiState<Post>?> = _creacion.asStateFlow()
+
+    /** Envía la publicación nueva con POST y guarda la respuesta. */
+    fun publicar(titulo: String, texto: String) {
+        viewModelScope.launch {
+            _creacion.value = UiState.Cargando
+            val nuevo = NuevoPost(userId = 1, title = titulo, body = texto)
+            repo.crear(nuevo)
+                .onSuccess { _creacion.value = UiState.Exito(it) }
+                .onFailure { _creacion.value = UiState.Error(mensajeDe(it)) }
+        }
+    }
+
+    /** Deja el formulario como nuevo al volver a abrir la pantalla Crear. */
+    fun limpiarCreacion() {
+        _creacion.value = null
     }
 }
 
