@@ -1,6 +1,8 @@
 package com.sovero.murocampus.ui
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -45,6 +47,7 @@ fun PantallaLista(
     val hayMas by vm.hayMas.collectAsStateWithLifecycle()
     val cargandoMas by vm.cargandoMas.collectAsStateWithLifecycle()
     val errorMas by vm.errorMas.collectAsStateWithLifecycle()
+    val sinConexion by vm.sinConexion.collectAsStateWithLifecycle()
 
     Column(modifier = modifier.fillMaxSize()) {
         // Paso 8: Todos y Usuario 1 a Usuario 10 (se desplaza de lado)
@@ -63,6 +66,20 @@ fun PantallaLista(
                 .fillMaxWidth()
                 .padding(horizontal = 12.dp)
         )
+
+        // Mejora (Fase 2): aviso cuando la lista sale de Room por falta de internet
+        if (sinConexion && estado is UiState.Exito) {
+            Text(
+                text = "Sin internet: mostrando publicaciones guardadas",
+                color = MaterialTheme.colorScheme.onErrorContainer,
+                style = MaterialTheme.typography.bodySmall,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 12.dp, vertical = 6.dp)
+                    .background(MaterialTheme.colorScheme.errorContainer, RoundedCornerShape(8.dp))
+                    .padding(8.dp)
+            )
+        }
 
         Box(modifier = Modifier.fillMaxSize()) {
             when (val e = estado) {

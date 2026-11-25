@@ -23,6 +23,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.sovero.murocampus.data.PostRepositoryRemote
+import com.sovero.murocampus.data.local.MuroDatabase
 import com.sovero.murocampus.data.remote.RetrofitClient
 import com.sovero.murocampus.ui.PantallaCrear
 import com.sovero.murocampus.ui.PantallaDetalle
@@ -38,9 +39,12 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             MuroCampusTheme {
-                // El ViewModel recibe el Repository; el Repository, la API
+                // El ViewModel recibe el Repository; el Repository, la API y
+                // (mejora de la Fase 2) el DAO de Room para la caché.
+                // El Context se usa aquí, nunca dentro del ViewModel.
+                val dao = MuroDatabase.obtener(applicationContext).postDao()
                 val vm: PostsViewModel = viewModel(
-                    factory = PostsViewModelFactory(PostRepositoryRemote(RetrofitClient.api))
+                    factory = PostsViewModelFactory(PostRepositoryRemote(RetrofitClient.api, dao))
                 )
                 PantallaPrincipal(vm)
             }

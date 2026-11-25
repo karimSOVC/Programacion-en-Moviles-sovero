@@ -1,5 +1,8 @@
 package com.sovero.murocampus.data
 
+import com.sovero.murocampus.data.local.PostDao
+import com.sovero.murocampus.data.local.aEntidad
+import com.sovero.murocampus.data.local.aPost
 import com.sovero.murocampus.data.remote.PostApi
 import com.sovero.murocampus.model.CambioTitulo
 import com.sovero.murocampus.model.Comentario
@@ -7,6 +10,7 @@ import com.sovero.murocampus.model.NuevoPost
 import com.sovero.murocampus.model.Post
 import kotlinx.coroutines.CancellationException
 import retrofit2.HttpException
+import java.io.IOException
 
 /**
  * Lo que el ViewModel puede pedir. Cada función devuelve un Result:
@@ -27,39 +31,104 @@ interface PostRepository {
 
     // Mejora (Fase 2): cambia el título con PATCH y devuelve la respuesta
     suspend fun editarTitulo(id: Int, titulo: String): Result<Post>
+
+    // Mejora (Fase 2): true si la última lista salió de Room por falta de internet
+    fun ultimaDesdeCache(): Boolean
 }
 
-/** Implementación que pide los datos a internet con Retrofit. */
-class PostRepositoryRemote(private val api: PostApi) : PostRepository {
+/**
+ * Implementación que pide los datos a internet con Retrofit.
+ *
+ * Mejora (Fase 2): guarda en Room lo que descarga y, si no hay internet,
+ * responde con lo guardado. El que decide de dónde salen los datos es el
+ * Repository; el ViewModel no se entera.
+ */
+class PostRepositoryRemote(
+    private val api: PostApi,
+    private val dao: PostDao
+) : PostRepository {
 
-    override suspend fun listar(): Result<List<Post>> = llamar { api.listar() }
+    // Se marca cuando una lista sale de Room en lugar de internet
+    private var desdeCache = false
 
-    override suspend fun detalle(id: Int): Result<Post> = llamar { api.detalle(id) }
+    override fun ultimaDesdeCache(): Boolean = desdeCache
+
+    override suspend fun listar(): Result<List<Post>> = conCache(
+        red = { api.listar() },
+        cache = { dao.todas().map { it.aPost() } }
+    )
+
+    override suspend fun detalle(id: Int): Result<Post> {
+        val resultado = llamar { api.detalle(id) }
+        // Sin internet, el post se puede leer de Room (los comentarios no se guardan)
+        val error = resultado.exceptionOrNull()
+        if (error is IOException) {
+            dao.buscar(id)?.let { return Result.success(it.aPost()) }
+        }
+        return resultado
+    }
 
     override suspend fun comentarios(id: Int): Result<List<Comentario>> =
         llamar { api.comentarios(id) }
 
-    override suspend fun porUsuario(userId: Int): Result<List<Post>> =
-        llamar { api.porUsuario(userId) }
+    override suspend fun porUsuario(userId: Int): Result<List<Post>> = conCache(
+        red = { api.porUsuario(userId) },
+        cache = { dao.porUsuario(userId).map { it.aPost() } }
+    )
 
     override suspend fun crear(nuevo: NuevoPost): Result<Post> = llamar { api.crear(nuevo) }
 
-    override suspend fun pagina(inicio: Int, limite: Int): Result<List<Post>> =
-        llamar { api.pagina(inicio, limite) }
+    override suspend fun pagina(inicio: Int, limite: Int): Result<List<Post>> = conCache(
+        red = { api.pagina(inicio, limite) },
+        cache = { dao.pagina(inicio, limite).map { it.aPost() } }
+    )
 
     override suspend fun borrar(id: Int): Result<Int> = llamar {
         val respuesta = api.borrar(id)
         // Response no lanza error con 404 o 500: hay que revisar el código
         if (!respuesta.isSuccessful) throw HttpException(respuesta)
+        dao.borrar(id) // también se quita de la caché
         respuesta.code()
     }
 
-    override suspend fun editarTitulo(id: Int, titulo: String): Result<Post> =
-        llamar { api.editarTitulo(id, CambioTitulo(title = titulo)) }
+    override suspend fun editarTitulo(id: Int, titulo: String): Result<Post> = llamar {
+        val post = api.editarTitulo(id, CambioTitulo(title = titulo))
+        dao.cambiarTitulo(id, post.title) // la caché queda con el título nuevo
+        post
+    }
+
+    /**
+     * Mejora (Fase 2): pide la lista a internet y la guarda en Room. Si no
+     * hay internet (IOException) y hay datos guardados, devuelve esos.
+     * Otros errores (404, JSON inesperado) se devuelven tal cual.
+     */
+    private suspend fun conCache(
+        red: suspend () -> List<Post>,
+        cache: suspend () -> List<Post>
+    ): Result<List<Post>> {
+        desdeCache = false
+        return try {
+            val posts = red()
+            dao.guardar(posts.map { it.aEntidad() })
+            Result.success(posts)
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: IOException) {
+            val guardados = cache()
+            if (guardados.isNotEmpty()) {
+                desdeCache = true
+                Result.success(guardados)
+            } else {
+                Result.failure(e)
+            }
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
 
     /**
      * Hace la llamada y la envuelve en un Result, así no se repite el
-     * try/catch en las cinco funciones.
+     * try/catch en cada función.
      */
     private suspend fun <T> llamar(bloque: suspend () -> T): Result<T> =
         try {

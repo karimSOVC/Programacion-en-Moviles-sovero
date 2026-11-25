@@ -63,6 +63,11 @@ class PostsViewModel(private val repo: PostRepository) : ViewModel() {
     private val _errorMas = MutableStateFlow<String?>(null)
     val errorMas: StateFlow<String?> = _errorMas.asStateFlow()
 
+    // ----- Mejora (Fase 2): true si la lista que se ve vino de los datos
+    // guardados porque no había internet (lo decide el Repository)
+    private val _sinConexion = MutableStateFlow(false)
+    val sinConexion: StateFlow<Boolean> = _sinConexion.asStateFlow()
+
     // Al crearse el ViewModel ya empieza a cargar. Va después de los
     // StateFlow que usa cargar(): Kotlin los crea en orden, de arriba abajo
     init { cargar() }
@@ -85,6 +90,7 @@ class PostsViewModel(private val repo: PostRepository) : ViewModel() {
             resultado
                 .onSuccess {
                     _lista.value = UiState.Exito(it)
+                    _sinConexion.value = repo.ultimaDesdeCache()
                     // Si llegó una página llena, puede haber más
                     _hayMas.value = userId == null && it.size == TAMANO_PAGINA
                 }
@@ -103,6 +109,7 @@ class PostsViewModel(private val repo: PostRepository) : ViewModel() {
             repo.pagina(inicio = actual.datos.size, limite = TAMANO_PAGINA)
                 .onSuccess { nuevos ->
                     _lista.value = UiState.Exito(actual.datos + nuevos)
+                    _sinConexion.value = repo.ultimaDesdeCache()
                     _hayMas.value = nuevos.size == TAMANO_PAGINA
                 }
                 .onFailure { _errorMas.value = mensajeDe(it) }
