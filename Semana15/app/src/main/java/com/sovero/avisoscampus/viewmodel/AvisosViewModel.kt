@@ -1,8 +1,10 @@
 package com.sovero.avisoscampus.viewmodel
 
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.sovero.avisoscampus.data.AvisosRepository
 import com.sovero.avisoscampus.model.Aviso
+import com.sovero.avisoscampus.model.Origen
 import com.sovero.avisoscampus.model.PermisoUi
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -10,6 +12,7 @@ import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.launch
 
 class AvisosViewModel(private val repo: AvisosRepository) : ViewModel() {
 
@@ -32,5 +35,16 @@ class AvisosViewModel(private val repo: AvisosRepository) : ViewModel() {
      */
     fun permisoRespondido(concedido: Boolean) {
         _permiso.value = if (concedido) PermisoUi.Concedido else PermisoUi.Denegado
+    }
+
+    /**
+     * Paso 3: anota el aviso en el Repository y emite el evento para que
+     * la pantalla lo muestre como notificación.
+     */
+    fun avisarAhora() {
+        viewModelScope.launch {
+            val aviso = repo.registrar("Tarea lista", "Tu entrega fue registrada", Origen.BOTON)
+            _eventos.emit(aviso)
+        }
     }
 }

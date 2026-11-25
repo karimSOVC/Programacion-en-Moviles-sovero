@@ -103,7 +103,11 @@ fun PantallaAvisos(vm: AvisosViewModel) {
                     Text("Permitir notificaciones")
                 }
             }
-            Tarjeta("Avisos") {}
+            Tarjeta("Avisos") {
+                Button(onClick = { vm.avisarAhora() }) {
+                    Text("Mostrar aviso")
+                }
+            }
             Tarjeta("Recordatorio") {}
             Tarjeta("Receptor de anuncios") {}
         }
