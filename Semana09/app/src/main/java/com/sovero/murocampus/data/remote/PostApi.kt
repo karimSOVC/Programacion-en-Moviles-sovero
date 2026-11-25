@@ -35,6 +35,13 @@ interface PostApi {
     @GET("posts")
     suspend fun porUsuario(@Query("userId") userId: Int): List<Post>
 
+    // Mejora (Fase 2): GET posts?_start=0&_limit=20 → una página de 20
+    @GET("posts")
+    suspend fun pagina(
+        @Query("_start") inicio: Int,
+        @Query("_limit") limite: Int
+    ): List<Post>
+
     // POST posts → @Body manda el objeto como JSON en el cuerpo
     @POST("posts")
     suspend fun crear(@Body nuevo: NuevoPost): Post

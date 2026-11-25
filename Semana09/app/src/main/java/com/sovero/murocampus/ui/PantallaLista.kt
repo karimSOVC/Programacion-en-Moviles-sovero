@@ -5,13 +5,17 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FilterChipDefaults
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
@@ -38,6 +42,9 @@ fun PantallaLista(
     val estado by vm.listaVisible.collectAsStateWithLifecycle()
     val filtro by vm.usuarioFiltro.collectAsStateWithLifecycle()
     val busqueda by vm.busqueda.collectAsStateWithLifecycle()
+    val hayMas by vm.hayMas.collectAsStateWithLifecycle()
+    val cargandoMas by vm.cargandoMas.collectAsStateWithLifecycle()
+    val errorMas by vm.errorMas.collectAsStateWithLifecycle()
 
     Column(modifier = modifier.fillMaxSize()) {
         // Paso 8: Todos y Usuario 1 a Usuario 10 (se desplaza de lado)
@@ -87,6 +94,30 @@ fun PantallaLista(
                                 onClick = { onAbrir(post.id) }
                             )
                         }
+
+                        // Mejora (Fase 2): botón para traer las 20 siguientes
+                        if (hayMas && busqueda.isBlank()) {
+                            item {
+                                Column(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    horizontalAlignment = Alignment.CenterHorizontally,
+                                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                                ) {
+                                    errorMas?.let {
+                                        Text(it, color = MaterialTheme.colorScheme.error)
+                                    }
+                                    if (cargandoMas) {
+                                        CircularProgressIndicator()
+                                    } else {
+                                        OutlinedButton(onClick = { vm.cargarMas() }) {
+                                            Text("Cargar más (${e.datos.size} de 100)")
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                        // Espacio para que el botón + no tape la última tarjeta
+                        item { Spacer(modifier = Modifier.height(72.dp)) }
                     }
                 }
             }

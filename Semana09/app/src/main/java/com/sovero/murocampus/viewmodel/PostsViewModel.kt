@@ -52,22 +52,61 @@ class PostsViewModel(private val repo: PostRepository) : ViewModel() {
         _busqueda.value = texto
     }
 
+    // ----- Mejora (Fase 2): paginación de 20 en 20
+    private val _hayMas = MutableStateFlow(false)
+    val hayMas: StateFlow<Boolean> = _hayMas.asStateFlow()
+
+    private val _cargandoMas = MutableStateFlow(false)
+    val cargandoMas: StateFlow<Boolean> = _cargandoMas.asStateFlow()
+
+    // Mensaje si falla "Cargar más" (la lista que ya estaba se conserva)
+    private val _errorMas = MutableStateFlow<String?>(null)
+    val errorMas: StateFlow<String?> = _errorMas.asStateFlow()
+
     // Al crearse el ViewModel ya empieza a cargar. Va después de los
     // StateFlow que usa cargar(): Kotlin los crea en orden, de arriba abajo
     init { cargar() }
 
     /**
      * Pide las publicaciones según el filtro actual; también la usa el
-     * botón Reintentar. Sin filtro: todas. Con filtro: solo las de ese usuario.
+     * botón Reintentar. Sin filtro: la primera página de 20 (mejora de la
+     * Fase 2). Con filtro: las de ese usuario (son 10, no se paginan).
      */
     fun cargar() {
         viewModelScope.launch {
             _lista.value = UiState.Cargando
+            _errorMas.value = null
             val userId = _usuarioFiltro.value
-            val resultado = if (userId == null) repo.listar() else repo.porUsuario(userId)
+            val resultado = if (userId == null) {
+                repo.pagina(inicio = 0, limite = TAMANO_PAGINA)
+            } else {
+                repo.porUsuario(userId)
+            }
             resultado
-                .onSuccess { _lista.value = UiState.Exito(it) }
+                .onSuccess {
+                    _lista.value = UiState.Exito(it)
+                    // Si llegó una página llena, puede haber más
+                    _hayMas.value = userId == null && it.size == TAMANO_PAGINA
+                }
                 .onFailure { _lista.value = UiState.Error(mensajeDe(it)) }
+        }
+    }
+
+    /** Mejora (Fase 2): pide la página siguiente y la agrega al final. */
+    fun cargarMas() {
+        val actual = _lista.value as? UiState.Exito ?: return
+        if (_cargandoMas.value || !_hayMas.value) return
+
+        viewModelScope.launch {
+            _cargandoMas.value = true
+            _errorMas.value = null
+            repo.pagina(inicio = actual.datos.size, limite = TAMANO_PAGINA)
+                .onSuccess { nuevos ->
+                    _lista.value = UiState.Exito(actual.datos + nuevos)
+                    _hayMas.value = nuevos.size == TAMANO_PAGINA
+                }
+                .onFailure { _errorMas.value = mensajeDe(it) }
+            _cargandoMas.value = false
         }
     }
 
@@ -123,6 +162,11 @@ class PostsViewModel(private val repo: PostRepository) : ViewModel() {
     /** Deja el formulario como nuevo al volver a abrir la pantalla Crear. */
     fun limpiarCreacion() {
         _creacion.value = null
+    }
+
+    companion object {
+        // Mejora (Fase 2): cuántas publicaciones trae cada página
+        const val TAMANO_PAGINA = 20
     }
 }
 

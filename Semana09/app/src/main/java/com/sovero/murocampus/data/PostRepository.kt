@@ -16,6 +16,9 @@ interface PostRepository {
     suspend fun comentarios(id: Int): Result<List<Comentario>>
     suspend fun porUsuario(userId: Int): Result<List<Post>>
     suspend fun crear(nuevo: NuevoPost): Result<Post>
+
+    // Mejora (Fase 2): una página de publicaciones, desde [inicio]
+    suspend fun pagina(inicio: Int, limite: Int): Result<List<Post>>
 }
 
 /** Implementación que pide los datos a internet con Retrofit. */
@@ -32,6 +35,9 @@ class PostRepositoryRemote(private val api: PostApi) : PostRepository {
         llamar { api.porUsuario(userId) }
 
     override suspend fun crear(nuevo: NuevoPost): Result<Post> = llamar { api.crear(nuevo) }
+
+    override suspend fun pagina(inicio: Int, limite: Int): Result<List<Post>> =
+        llamar { api.pagina(inicio, limite) }
 
     /**
      * Hace la llamada y la envuelve en un Result, así no se repite el
