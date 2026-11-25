@@ -1,9 +1,13 @@
 package com.sovero.avisoscampus.ui
 
 import android.Manifest
+import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
+import android.net.Uri
 import android.os.Build
+import android.provider.Settings
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.material3.Switch
 import androidx.compose.runtime.DisposableEffect
 import androidx.core.content.ContextCompat
@@ -53,7 +57,9 @@ fun PantallaAvisos(vm: AvisosViewModel) {
     val contexto = LocalContext.current
     LaunchedEffect(Unit) {
         vm.eventos.collect { aviso ->
-            Notificador.mostrar(contexto, aviso)
+            val mostrado = Notificador.mostrar(contexto, aviso)
+            // Paso 8: si no se pudo mostrar (sin permiso), se avisa al ViewModel
+            if (!mostrado) vm.noSePudoMostrar()
         }
     }
 
@@ -61,6 +67,7 @@ fun PantallaAvisos(vm: AvisosViewModel) {
     val faltan by vm.faltan.collectAsState()
     val escuchando by vm.escuchandoAvion.collectAsState()
     val avisos by vm.avisos.collectAsState()
+    val mensaje by vm.mensaje.collectAsState()
 
     // Paso 6: el receptor se registra solo mientras el switch está activado,
     // y se quita en onDispose (al apagar el switch o al salir de la pantalla)
@@ -129,6 +136,29 @@ fun PantallaAvisos(vm: AvisosViewModel) {
                 }) {
                     Text("Permitir notificaciones")
                 }
+
+                // Paso 8: recuadro de error, solo si hay mensaje
+                mensaje?.let { texto ->
+                    Surface(
+                        color = MaterialTheme.colorScheme.errorContainer,
+                        shape = RoundedCornerShape(12.dp),
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Text(
+                            text = texto,
+                            color = MaterialTheme.colorScheme.onErrorContainer,
+                            textAlign = TextAlign.Center,
+                            modifier = Modifier.padding(12.dp)
+                        )
+                    }
+                }
+
+                // Paso 8: con el permiso negado, se puede activar a mano en Ajustes
+                if (permiso is PermisoUi.Denegado || mensaje != null) {
+                    OutlinedButton(onClick = { abrirAjustes(contexto) }) {
+                        Text("Abrir ajustes")
+                    }
+                }
             }
             Tarjeta("Avisos") {
                 Button(onClick = { vm.avisarAhora() }) {
@@ -172,6 +202,21 @@ fun PantallaAvisos(vm: AvisosViewModel) {
             HistorialAvisos(avisos)
         }
     }
+}
+
+/**
+ * Paso 8: abre la pantalla de notificaciones de esta app en Ajustes.
+ * Esa pantalla existe desde Android 8; antes se abre la información de la app.
+ */
+private fun abrirAjustes(contexto: Context) {
+    val intent = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+        Intent(Settings.ACTION_APP_NOTIFICATION_SETTINGS)
+            .putExtra(Settings.EXTRA_APP_PACKAGE, contexto.packageName)
+    } else {
+        Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS)
+            .setData(Uri.fromParts("package", contexto.packageName, null))
+    }
+    contexto.startActivity(intent)
 }
 
 /** Etiqueta de color: Sin pedir (gris), Permitido (verde) o Denegado (rojo). */
