@@ -1,7 +1,13 @@
 package com.sovero.avisoscampus.ui
 
 import android.Manifest
+import android.content.Intent
+import android.content.IntentFilter
 import android.os.Build
+import androidx.compose.material3.Switch
+import androidx.compose.runtime.DisposableEffect
+import androidx.core.content.ContextCompat
+import com.sovero.avisoscampus.receiver.ModoAvionReceiver
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
@@ -53,6 +59,24 @@ fun PantallaAvisos(vm: AvisosViewModel) {
 
     val permiso by vm.permiso.collectAsState()
     val faltan by vm.faltan.collectAsState()
+    val escuchando by vm.escuchandoAvion.collectAsState()
+
+    // Paso 6: el receptor se registra solo mientras el switch está activado,
+    // y se quita en onDispose (al apagar el switch o al salir de la pantalla)
+    DisposableEffect(escuchando) {
+        if (escuchando) {
+            val receptor = ModoAvionReceiver { activo -> vm.alCambiarModoAvion(activo) }
+            ContextCompat.registerReceiver(
+                contexto,
+                receptor,
+                IntentFilter(Intent.ACTION_AIRPLANE_MODE_CHANGED),
+                ContextCompat.RECEIVER_NOT_EXPORTED
+            )
+            onDispose { contexto.unregisterReceiver(receptor) }
+        } else {
+            onDispose { }
+        }
+    }
 
     // Paso 2: el cuadro del permiso lo dibuja Android; aquí llega la respuesta
     val lanzador = rememberLauncherForActivityResult(
@@ -124,7 +148,25 @@ fun PantallaAvisos(vm: AvisosViewModel) {
                 }
                 faltan?.let { Text("Faltan $it s", fontWeight = FontWeight.Bold) }
             }
-            Tarjeta("Receptor de anuncios") {}
+            Tarjeta("Receptor de anuncios") {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.SpaceBetween
+                ) {
+                    Text("Escuchar el modo avión")
+                    Switch(
+                        checked = escuchando,
+                        onCheckedChange = { vm.cambiarEscucha(it) }
+                    )
+                }
+                Text(
+                    text = "Activa o desactiva el modo avión del celular",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.fillMaxWidth()
+                )
+            }
         }
     }
 }
