@@ -49,6 +49,10 @@ historial. Si el usuario niega el permiso, la app sigue funcionando.
 | Texto largo | Al expandir la notificación se ve el texto completo con su origen y su hora (`BigTextStyle`). | Notificador |
 | Receptor del cargador | Switch **Escuchar el cargador**: avisa «Conectado» o «Desconectado» con `ACTION_POWER_CONNECTED` y `ACTION_POWER_DISCONNECTED`. | Receiver + ViewModel + View |
 
+| Cargador en el panel | Notificación expandida | Historial con el cargador |
+|---|---|---|
+| ![Cargador](docs/capturas/08-cargador-panel.png) | ![Expandida](docs/capturas/09-notificacion-expandida.png) | ![Historial](docs/capturas/10-historial-cargador.png) |
+
 Los prompts usados y qué cambié de cada respuesta están en [PROMPTS.md](PROMPTS.md).
 
 ## Estructura de paquetes
