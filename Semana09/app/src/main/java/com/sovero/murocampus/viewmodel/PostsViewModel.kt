@@ -169,6 +169,42 @@ class PostsViewModel(private val repo: PostRepository) : ViewModel() {
         }
     }
 
+    // ----- Mejora (Fase 2): editar el título. null = no se envió
+    private val _edicion = MutableStateFlow<UiState<Post>?>(null)
+    val edicion: StateFlow<UiState<Post>?> = _edicion.asStateFlow()
+
+    /**
+     * Envía el título nuevo con PATCH. Si responde bien, también cambia el
+     * título en la lista y en el detalle que ya están en pantalla.
+     */
+    fun editarTitulo(id: Int, titulo: String) {
+        viewModelScope.launch {
+            _edicion.value = UiState.Cargando
+            repo.editarTitulo(id, titulo)
+                .onSuccess { post ->
+                    _edicion.value = UiState.Exito(post)
+                    val lista = _lista.value
+                    if (lista is UiState.Exito) {
+                        _lista.value = UiState.Exito(
+                            lista.datos.map { if (it.id == id) it.copy(title = post.title) else it }
+                        )
+                    }
+                    val detalle = _detalle.value
+                    if (detalle is UiState.Exito && detalle.datos.post.id == id) {
+                        _detalle.value = UiState.Exito(
+                            detalle.datos.copy(post = detalle.datos.post.copy(title = post.title))
+                        )
+                    }
+                }
+                .onFailure { _edicion.value = UiState.Error(mensajeDe(it)) }
+        }
+    }
+
+    /** Deja la pantalla Editar sin respuesta al abrirla. */
+    fun limpiarEdicion() {
+        _edicion.value = null
+    }
+
     // ----- Crear publicación (paso 9): null = todavía no se envió
     private val _creacion = MutableStateFlow<UiState<Post>?>(null)
     val creacion: StateFlow<UiState<Post>?> = _creacion.asStateFlow()

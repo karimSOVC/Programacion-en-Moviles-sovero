@@ -1,6 +1,7 @@
 package com.sovero.murocampus.data
 
 import com.sovero.murocampus.data.remote.PostApi
+import com.sovero.murocampus.model.CambioTitulo
 import com.sovero.murocampus.model.Comentario
 import com.sovero.murocampus.model.NuevoPost
 import com.sovero.murocampus.model.Post
@@ -23,6 +24,9 @@ interface PostRepository {
 
     // Mejora (Fase 2): borra la publicación; si sale bien, devuelve el código HTTP
     suspend fun borrar(id: Int): Result<Int>
+
+    // Mejora (Fase 2): cambia el título con PATCH y devuelve la respuesta
+    suspend fun editarTitulo(id: Int, titulo: String): Result<Post>
 }
 
 /** Implementación que pide los datos a internet con Retrofit. */
@@ -49,6 +53,9 @@ class PostRepositoryRemote(private val api: PostApi) : PostRepository {
         if (!respuesta.isSuccessful) throw HttpException(respuesta)
         respuesta.code()
     }
+
+    override suspend fun editarTitulo(id: Int, titulo: String): Result<Post> =
+        llamar { api.editarTitulo(id, CambioTitulo(title = titulo)) }
 
     /**
      * Hace la llamada y la envuelve en un Result, así no se repite el

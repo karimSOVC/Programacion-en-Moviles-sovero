@@ -1,5 +1,6 @@
 package com.sovero.murocampus.data.remote
 
+import com.sovero.murocampus.model.CambioTitulo
 import com.sovero.murocampus.model.Comentario
 import com.sovero.murocampus.model.NuevoPost
 import com.sovero.murocampus.model.Post
@@ -8,6 +9,7 @@ import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.DELETE
 import retrofit2.http.GET
+import retrofit2.http.PATCH
 import retrofit2.http.POST
 import retrofit2.http.Path
 import retrofit2.http.Query
@@ -48,6 +50,11 @@ interface PostApi {
     // ver el código HTTP (200 si se borró) aunque no haya cuerpo
     @DELETE("posts/{id}")
     suspend fun borrar(@Path("id") id: Int): Response<Unit>
+
+    // Mejora (Fase 2): PATCH posts/1 con {"title": "..."} → la publicación
+    // con el título cambiado
+    @PATCH("posts/{id}")
+    suspend fun editarTitulo(@Path("id") id: Int, @Body cambio: CambioTitulo): Post
 
     // POST posts → @Body manda el objeto como JSON en el cuerpo
     @POST("posts")

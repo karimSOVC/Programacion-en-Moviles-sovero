@@ -26,6 +26,7 @@ import com.sovero.murocampus.data.PostRepositoryRemote
 import com.sovero.murocampus.data.remote.RetrofitClient
 import com.sovero.murocampus.ui.PantallaCrear
 import com.sovero.murocampus.ui.PantallaDetalle
+import com.sovero.murocampus.ui.PantallaEditar
 import com.sovero.murocampus.ui.PantallaLista
 import com.sovero.murocampus.ui.theme.MuroCampusTheme
 import com.sovero.murocampus.viewmodel.PostsViewModel
@@ -57,11 +58,18 @@ class MainActivity : ComponentActivity() {
 fun PantallaPrincipal(vm: PostsViewModel) {
     var idSeleccionado by rememberSaveable { mutableStateOf<Int?>(null) }
     var creando by rememberSaveable { mutableStateOf(false) }
+    // Mejora (Fase 2): título que se está editando (null = no se edita)
+    var tituloEditando by rememberSaveable { mutableStateOf<String?>(null) }
 
-    // El botón Atrás del sistema vuelve a la lista (sin recargarla)
+    // El botón Atrás del sistema: desde Editar vuelve al detalle;
+    // desde el detalle o Crear vuelve a la lista (sin recargarla)
     BackHandler(enabled = idSeleccionado != null || creando) {
-        idSeleccionado = null
-        creando = false
+        if (tituloEditando != null) {
+            tituloEditando = null
+        } else {
+            idSeleccionado = null
+            creando = false
+        }
     }
 
     Scaffold(
@@ -103,7 +111,20 @@ fun PantallaPrincipal(vm: PostsViewModel) {
                 modifier = modificador
             )
         } else {
-            PantallaDetalle(vm = vm, id = id, modifier = modificador)
+            val titulo = tituloEditando
+            if (titulo != null) {
+                PantallaEditar(vm = vm, id = id, tituloActual = titulo, modifier = modificador)
+            } else {
+                PantallaDetalle(
+                    vm = vm,
+                    id = id,
+                    onEditar = { tituloDelPost ->
+                        vm.limpiarEdicion()
+                        tituloEditando = tituloDelPost
+                    },
+                    modifier = modificador
+                )
+            }
         }
     }
 }

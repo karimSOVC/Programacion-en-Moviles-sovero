@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -15,6 +16,7 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -33,7 +35,12 @@ import com.sovero.murocampus.viewmodel.UiState
  * "Comentarios (N)" con el correo y el texto de cada uno.
  */
 @Composable
-fun PantallaDetalle(vm: PostsViewModel, id: Int, modifier: Modifier = Modifier) {
+fun PantallaDetalle(
+    vm: PostsViewModel,
+    id: Int,
+    onEditar: (titulo: String) -> Unit,
+    modifier: Modifier = Modifier
+) {
     val estado by vm.detalle.collectAsStateWithLifecycle()
     val borrado by vm.borrado.collectAsStateWithLifecycle()
 
@@ -77,7 +84,8 @@ fun PantallaDetalle(vm: PostsViewModel, id: Int, modifier: Modifier = Modifier) 
                 item {
                     AccionesDetalle(
                         borrado = borrado,
-                        onEliminar = { vm.borrar(id) }
+                        onEliminar = { vm.borrar(id) },
+                        onEditar = { onEditar(e.datos.post.title) }
                     )
                 }
                 item {
@@ -97,23 +105,34 @@ fun PantallaDetalle(vm: PostsViewModel, id: Int, modifier: Modifier = Modifier) 
 }
 
 /**
- * Mejora (Fase 2): botón Eliminar. Después muestra lo que respondió el
- * servidor: el código HTTP si salió bien o el mensaje de error.
+ * Mejora (Fase 2): botones Editar título y Eliminar. Después de eliminar
+ * muestra lo que respondió el servidor: el código HTTP o el error.
  */
 @Composable
-private fun AccionesDetalle(borrado: UiState<Int>?, onEliminar: () -> Unit) {
+private fun AccionesDetalle(
+    borrado: UiState<Int>?,
+    onEliminar: () -> Unit,
+    onEditar: () -> Unit
+) {
+    // Ya no se puede editar ni borrar una publicación eliminada
+    val eliminada = borrado is UiState.Exito
     Column(
         modifier = Modifier.fillMaxWidth(),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
-        Button(
-            onClick = onEliminar,
-            // No se puede borrar dos veces ni mientras se está borrando
-            enabled = borrado == null || borrado is UiState.Error,
-            colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error)
-        ) {
-            Text("Eliminar")
+        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            OutlinedButton(onClick = onEditar, enabled = !eliminada) {
+                Text("Editar título")
+            }
+            Button(
+                onClick = onEliminar,
+                // No se puede borrar dos veces ni mientras se está borrando
+                enabled = borrado == null || borrado is UiState.Error,
+                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error)
+            ) {
+                Text("Eliminar")
+            }
         }
         when (borrado) {
             null -> {}

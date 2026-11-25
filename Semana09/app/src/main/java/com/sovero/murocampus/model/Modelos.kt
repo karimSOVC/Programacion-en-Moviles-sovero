@@ -32,6 +32,15 @@ data class NuevoPost(
     val body: String
 )
 
+/**
+ * Mejora (Fase 2): lo que se envía con PATCH para cambiar solo el título.
+ * PATCH modifica los campos que mandas; PUT reemplazaría la publicación entera.
+ */
+@Serializable
+data class CambioTitulo(
+    val title: String
+)
+
 /** Ejemplo resuelto [E]: un usuario de GET users. */
 @Serializable
 data class Usuario(
