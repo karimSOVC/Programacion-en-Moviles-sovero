@@ -82,10 +82,12 @@ class AvisosViewModel(private val repo: AvisosRepository) : ViewModel() {
                     _faltan.value = s
                     delay(1000)
                 }
+                // Mejora (Fase 2): el recordatorio es urgente (sale como ventana emergente)
                 val aviso = repo.registrar(
                     "Recordatorio",
                     "Revisa tu laboratorio pendiente",
-                    Origen.RECORDATORIO
+                    Origen.RECORDATORIO,
+                    urgente = true
                 )
                 _eventos.emit(aviso)
             } finally {

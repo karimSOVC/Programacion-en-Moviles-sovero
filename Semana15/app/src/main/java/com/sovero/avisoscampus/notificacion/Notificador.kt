@@ -23,10 +23,13 @@ import com.sovero.avisoscampus.model.Aviso
 object Notificador {
     const val CANAL = "avisos"
 
+    // Mejora (Fase 2): segundo canal, con importancia alta
+    const val CANAL_URGENTE = "urgentes"
+
     /**
-     * Crea el canal "Avisos". Desde Android 8 (API 26, O) toda notificación
-     * necesita un canal; en versiones anteriores no existen.
-     * Crearlo varias veces no pasa nada: Android lo crea una sola vez.
+     * Crea los canales "Avisos" y "Urgentes". Desde Android 8 (API 26, O)
+     * toda notificación necesita un canal; en versiones anteriores no existen.
+     * Crearlos varias veces no pasa nada: Android los crea una sola vez.
      */
     fun crearCanal(context: Context) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -35,8 +38,17 @@ object Notificador {
                 "Avisos",
                 NotificationManager.IMPORTANCE_DEFAULT
             )
+            // Mejora (Fase 2): IMPORTANCE_HIGH hace que salga como ventana
+            // emergente arriba de la pantalla y con sonido
+            val urgente = NotificationChannel(
+                CANAL_URGENTE,
+                "Urgentes",
+                NotificationManager.IMPORTANCE_HIGH
+            ).apply { description = "Recordatorios que no hay que perder" }
+
             val manager = context.getSystemService(NotificationManager::class.java)
             manager.createNotificationChannel(canal)
+            manager.createNotificationChannel(urgente)
         }
     }
 
@@ -71,11 +83,20 @@ object Notificador {
             PendingIntent.FLAG_IMMUTABLE
         )
 
-        val notificacion = NotificationCompat.Builder(context, CANAL)
+        // Mejora (Fase 2): el aviso urgente va por el canal Urgentes. La
+        // prioridad alta es para Android 7 o menos, donde no hay canales
+        val canal = if (aviso.urgente) CANAL_URGENTE else CANAL
+        val prioridad = if (aviso.urgente) {
+            NotificationCompat.PRIORITY_HIGH
+        } else {
+            NotificationCompat.PRIORITY_DEFAULT
+        }
+
+        val notificacion = NotificationCompat.Builder(context, canal)
             .setSmallIcon(R.drawable.ic_notificacion)
             .setContentTitle(aviso.titulo)
             .setContentText(aviso.texto)
-            .setPriority(NotificationCompat.PRIORITY_DEFAULT)
+            .setPriority(prioridad)
             .setContentIntent(pendiente)
             // Al tocarla, la notificación se quita del panel
             .setAutoCancel(true)
