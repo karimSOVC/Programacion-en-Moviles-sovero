@@ -4,7 +4,9 @@ import com.sovero.murocampus.model.Comentario
 import com.sovero.murocampus.model.NuevoPost
 import com.sovero.murocampus.model.Post
 import com.sovero.murocampus.model.Usuario
+import retrofit2.Response
 import retrofit2.http.Body
+import retrofit2.http.DELETE
 import retrofit2.http.GET
 import retrofit2.http.POST
 import retrofit2.http.Path
@@ -41,6 +43,11 @@ interface PostApi {
         @Query("_start") inicio: Int,
         @Query("_limit") limite: Int
     ): List<Post>
+
+    // Mejora (Fase 2): DELETE posts/1 → respuesta vacía. Response<Unit> deja
+    // ver el código HTTP (200 si se borró) aunque no haya cuerpo
+    @DELETE("posts/{id}")
+    suspend fun borrar(@Path("id") id: Int): Response<Unit>
 
     // POST posts → @Body manda el objeto como JSON en el cuerpo
     @POST("posts")

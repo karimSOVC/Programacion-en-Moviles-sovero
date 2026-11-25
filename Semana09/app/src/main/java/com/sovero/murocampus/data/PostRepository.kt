@@ -5,6 +5,7 @@ import com.sovero.murocampus.model.Comentario
 import com.sovero.murocampus.model.NuevoPost
 import com.sovero.murocampus.model.Post
 import kotlinx.coroutines.CancellationException
+import retrofit2.HttpException
 
 /**
  * Lo que el ViewModel puede pedir. Cada función devuelve un Result:
@@ -19,6 +20,9 @@ interface PostRepository {
 
     // Mejora (Fase 2): una página de publicaciones, desde [inicio]
     suspend fun pagina(inicio: Int, limite: Int): Result<List<Post>>
+
+    // Mejora (Fase 2): borra la publicación; si sale bien, devuelve el código HTTP
+    suspend fun borrar(id: Int): Result<Int>
 }
 
 /** Implementación que pide los datos a internet con Retrofit. */
@@ -38,6 +42,13 @@ class PostRepositoryRemote(private val api: PostApi) : PostRepository {
 
     override suspend fun pagina(inicio: Int, limite: Int): Result<List<Post>> =
         llamar { api.pagina(inicio, limite) }
+
+    override suspend fun borrar(id: Int): Result<Int> = llamar {
+        val respuesta = api.borrar(id)
+        // Response no lanza error con 404 o 500: hay que revisar el código
+        if (!respuesta.isSuccessful) throw HttpException(respuesta)
+        respuesta.code()
+    }
 
     /**
      * Hace la llamada y la envuelve en un Result, así no se repite el

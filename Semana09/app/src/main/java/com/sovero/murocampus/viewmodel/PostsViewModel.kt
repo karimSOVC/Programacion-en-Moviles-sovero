@@ -125,6 +125,8 @@ class PostsViewModel(private val repo: PostRepository) : ViewModel() {
      * Si cualquiera de las dos falla, todo el detalle muestra el error.
      */
     fun abrir(id: Int) {
+        // Mejora (Fase 2): cada detalle empieza sin el mensaje de borrado
+        _borrado.value = null
         viewModelScope.launch {
             _detalle.value = UiState.Cargando
             val (resPost, resComentarios) = coroutineScope {
@@ -141,6 +143,29 @@ class PostsViewModel(private val repo: PostRepository) : ViewModel() {
                 return@launch
             }
             _detalle.value = UiState.Exito(DetalleUi(post, comentarios))
+        }
+    }
+
+    // ----- Mejora (Fase 2): borrar publicación. null = no se intentó
+    private val _borrado = MutableStateFlow<UiState<Int>?>(null)
+    val borrado: StateFlow<UiState<Int>?> = _borrado.asStateFlow()
+
+    /**
+     * Borra la publicación en el servidor. Si responde bien, también la
+     * quita de la lista que ya está en pantalla, sin volver a descargarla.
+     */
+    fun borrar(id: Int) {
+        viewModelScope.launch {
+            _borrado.value = UiState.Cargando
+            repo.borrar(id)
+                .onSuccess { codigo ->
+                    _borrado.value = UiState.Exito(codigo)
+                    val actual = _lista.value
+                    if (actual is UiState.Exito) {
+                        _lista.value = UiState.Exito(actual.datos.filter { it.id != id })
+                    }
+                }
+                .onFailure { _borrado.value = UiState.Error(mensajeDe(it)) }
         }
     }
 
