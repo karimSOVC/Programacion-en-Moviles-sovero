@@ -89,4 +89,27 @@ class AvisosViewModel(private val repo: AvisosRepository) : ViewModel() {
     fun cancelarRecordatorio() {
         trabajo?.cancel()
     }
+
+    // Paso 6: true mientras el switch "Escuchar el modo avión" está activado
+    private val _escuchandoAvion = MutableStateFlow(false)
+    val escuchandoAvion: StateFlow<Boolean> = _escuchandoAvion.asStateFlow()
+
+    fun cambiarEscucha(valor: Boolean) {
+        _escuchandoAvion.value = valor
+    }
+
+    /**
+     * Paso 6: la pantalla avisa que cambió el modo avión. El ViewModel
+     * registra el aviso y lo emite; no sabe cómo se escucha al celular.
+     */
+    fun alCambiarModoAvion(activo: Boolean) {
+        viewModelScope.launch {
+            val aviso = repo.registrar(
+                "Modo avión",
+                if (activo) "Activado" else "Desactivado",
+                Origen.MODO_AVION
+            )
+            _eventos.emit(aviso)
+        }
+    }
 }
