@@ -22,17 +22,33 @@ class PostsViewModel(private val repo: PostRepository) : ViewModel() {
     private val _lista = MutableStateFlow<UiState<List<Post>>>(UiState.Cargando)
     val lista: StateFlow<UiState<List<Post>>> = _lista.asStateFlow()
 
-    // Al crearse el ViewModel ya empieza a cargar
+    // ----- Filtro por usuario (paso 8): null significa Todos
+    private val _usuarioFiltro = MutableStateFlow<Int?>(null)
+    val usuarioFiltro: StateFlow<Int?> = _usuarioFiltro.asStateFlow()
+
+    // Al crearse el ViewModel ya empieza a cargar. Va después de los
+    // StateFlow que usa cargar(): Kotlin los crea en orden, de arriba abajo
     init { cargar() }
 
-    /** Pide las publicaciones; también la usa el botón Reintentar. */
+    /**
+     * Pide las publicaciones según el filtro actual; también la usa el
+     * botón Reintentar. Sin filtro: todas. Con filtro: solo las de ese usuario.
+     */
     fun cargar() {
         viewModelScope.launch {
             _lista.value = UiState.Cargando
-            repo.listar()
+            val userId = _usuarioFiltro.value
+            val resultado = if (userId == null) repo.listar() else repo.porUsuario(userId)
+            resultado
                 .onSuccess { _lista.value = UiState.Exito(it) }
                 .onFailure { _lista.value = UiState.Error(mensajeDe(it)) }
         }
+    }
+
+    /** Guarda el filtro elegido en los chips y vuelve a cargar la lista. */
+    fun filtrar(userId: Int?) {
+        _usuarioFiltro.value = userId
+        cargar()
     }
 
     // ----- Detalle con comentarios (paso 7)
