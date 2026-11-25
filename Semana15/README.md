@@ -53,6 +53,10 @@ historial. Si el usuario niega el permiso, la app sigue funcionando.
 |---|---|---|
 | ![Cargador](docs/capturas/08-cargador-panel.png) | ![Expandida](docs/capturas/09-notificacion-expandida.png) | ![Historial](docs/capturas/10-historial-cargador.png) |
 
+| Recordatorio urgente (ventana emergente) |
+|---|
+| ![Recordatorio urgente](docs/capturas/11-recordatorio-urgente.png) |
+
 Los prompts usados y qué cambié de cada respuesta están en [PROMPTS.md](PROMPTS.md).
 
 ## Estructura de paquetes
