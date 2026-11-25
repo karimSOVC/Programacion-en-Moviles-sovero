@@ -20,7 +20,11 @@ import com.sovero.murocampus.viewmodel.UiState
  * Cargando, Error (con Reintentar) o Exito (la lista).
  */
 @Composable
-fun PantallaLista(vm: PostsViewModel, modifier: Modifier = Modifier) {
+fun PantallaLista(
+    vm: PostsViewModel,
+    onAbrir: (Int) -> Unit,
+    modifier: Modifier = Modifier
+) {
     val estado by vm.lista.collectAsStateWithLifecycle()
 
     Box(modifier = modifier.fillMaxSize()) {
@@ -42,7 +46,8 @@ fun PantallaLista(vm: PostsViewModel, modifier: Modifier = Modifier) {
                         userId = post.userId,
                         titulo = post.title,
                         texto = post.body,
-                        maxLineasTexto = 2
+                        maxLineasTexto = 2,
+                        onClick = { onAbrir(post.id) }
                     )
                 }
             }

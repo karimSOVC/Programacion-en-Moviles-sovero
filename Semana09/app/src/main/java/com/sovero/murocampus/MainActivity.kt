@@ -2,6 +2,7 @@ package com.sovero.murocampus
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity
+import androidx.activity.compose.BackHandler
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.fillMaxSize
@@ -13,11 +14,16 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.sovero.murocampus.data.PostRepositoryRemote
 import com.sovero.murocampus.data.remote.RetrofitClient
+import com.sovero.murocampus.ui.PantallaDetalle
 import com.sovero.murocampus.ui.PantallaLista
 import com.sovero.murocampus.ui.theme.MuroCampusTheme
 import com.sovero.murocampus.viewmodel.PostsViewModel
@@ -39,10 +45,20 @@ class MainActivity : ComponentActivity() {
     }
 }
 
-/** Barra azul MuroCampus y, debajo, la pantalla de la lista. */
+/**
+ * Barra azul MuroCampus y, debajo, la lista o el detalle.
+ * idSeleccionado = null muestra la lista; con un id, el detalle.
+ */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PantallaPrincipal(vm: PostsViewModel) {
+    var idSeleccionado by rememberSaveable { mutableStateOf<Int?>(null) }
+
+    // El botón Atrás del sistema vuelve a la lista (sin recargarla)
+    BackHandler(enabled = idSeleccionado != null) {
+        idSeleccionado = null
+    }
+
     Scaffold(
         topBar = {
             TopAppBar(
@@ -54,11 +70,22 @@ fun PantallaPrincipal(vm: PostsViewModel) {
             )
         }
     ) { padding ->
-        PantallaLista(
-            vm = vm,
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(padding)
-        )
+        val modificador = Modifier
+            .fillMaxSize()
+            .padding(padding)
+
+        val id = idSeleccionado
+        if (id == null) {
+            PantallaLista(
+                vm = vm,
+                onAbrir = { idTocado ->
+                    vm.abrir(idTocado)
+                    idSeleccionado = idTocado
+                },
+                modifier = modificador
+            )
+        } else {
+            PantallaDetalle(vm = vm, id = id, modifier = modificador)
+        }
     }
 }
