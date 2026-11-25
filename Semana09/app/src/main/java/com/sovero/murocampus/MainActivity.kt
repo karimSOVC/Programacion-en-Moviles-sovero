@@ -8,6 +8,7 @@ import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -23,6 +24,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.sovero.murocampus.data.PostRepositoryRemote
 import com.sovero.murocampus.data.remote.RetrofitClient
+import com.sovero.murocampus.ui.PantallaCrear
 import com.sovero.murocampus.ui.PantallaDetalle
 import com.sovero.murocampus.ui.PantallaLista
 import com.sovero.murocampus.ui.theme.MuroCampusTheme
@@ -48,18 +50,32 @@ class MainActivity : ComponentActivity() {
 /**
  * Barra azul MuroCampus y, debajo, la lista o el detalle.
  * idSeleccionado = null muestra la lista; con un id, el detalle.
+ * creando = true muestra el formulario para crear una publicación.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun PantallaPrincipal(vm: PostsViewModel) {
     var idSeleccionado by rememberSaveable { mutableStateOf<Int?>(null) }
+    var creando by rememberSaveable { mutableStateOf(false) }
 
     // El botón Atrás del sistema vuelve a la lista (sin recargarla)
-    BackHandler(enabled = idSeleccionado != null) {
+    BackHandler(enabled = idSeleccionado != null || creando) {
         idSeleccionado = null
+        creando = false
     }
 
     Scaffold(
+        // Paso 9: el botón + solo se ve en la lista y abre la pantalla Crear
+        floatingActionButton = {
+            if (idSeleccionado == null && !creando) {
+                FloatingActionButton(onClick = {
+                    vm.limpiarCreacion()
+                    creando = true
+                }) {
+                    Text("+", style = MaterialTheme.typography.headlineMedium)
+                }
+            }
+        },
         topBar = {
             TopAppBar(
                 title = { Text("MuroCampus", fontWeight = FontWeight.Bold) },
@@ -75,7 +91,9 @@ fun PantallaPrincipal(vm: PostsViewModel) {
             .padding(padding)
 
         val id = idSeleccionado
-        if (id == null) {
+        if (creando) {
+            PantallaCrear(vm = vm, modifier = modificador)
+        } else if (id == null) {
             PantallaLista(
                 vm = vm,
                 onAbrir = { idTocado ->
