@@ -60,6 +60,7 @@ fun PantallaAvisos(vm: AvisosViewModel) {
     val permiso by vm.permiso.collectAsState()
     val faltan by vm.faltan.collectAsState()
     val escuchando by vm.escuchandoAvion.collectAsState()
+    val avisos by vm.avisos.collectAsState()
 
     // Paso 6: el receptor se registra solo mientras el switch está activado,
     // y se quita en onDispose (al apagar el switch o al salir de la pantalla)
@@ -167,6 +168,8 @@ fun PantallaAvisos(vm: AvisosViewModel) {
                     modifier = Modifier.fillMaxWidth()
                 )
             }
+            // Paso 7: todos los avisos, con lo más reciente arriba
+            HistorialAvisos(avisos)
         }
     }
 }
