@@ -1,8 +1,20 @@
 package com.sovero.avisoscampus.ui
 
+import android.Manifest
+import android.os.Build
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Button
+import androidx.compose.material3.Surface
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.ui.graphics.Color
+import com.sovero.avisoscampus.model.PermisoUi
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -38,6 +50,20 @@ fun PantallaAvisos(vm: AvisosViewModel) {
         }
     }
 
+    val permiso by vm.permiso.collectAsState()
+
+    // Paso 2: el cuadro del permiso lo dibuja Android; aquí llega la respuesta
+    val lanzador = rememberLauncherForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { concedido ->
+        vm.permisoRespondido(concedido)
+    }
+
+    // Al iniciar: si el permiso ya estaba concedido, se avisa al ViewModel
+    LaunchedEffect(Unit) {
+        if (Notificador.tienePermiso(contexto)) vm.permisoRespondido(true)
+    }
+
     Scaffold(
         topBar = {
             TopAppBar(
@@ -57,11 +83,49 @@ fun PantallaAvisos(vm: AvisosViewModel) {
                 .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            Tarjeta("Permiso de notificaciones") {}
+            Tarjeta("Permiso de notificaciones") {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    Text("Estado:")
+                    EtiquetaPermiso(permiso)
+                }
+                Button(onClick = {
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                        // Android 13 o más: aparece el cuadro de Android
+                        lanzador.launch(Manifest.permission.POST_NOTIFICATIONS)
+                    } else {
+                        // Versiones anteriores: el permiso ya viene dado
+                        vm.permisoRespondido(true)
+                    }
+                }) {
+                    Text("Permitir notificaciones")
+                }
+            }
             Tarjeta("Avisos") {}
             Tarjeta("Recordatorio") {}
             Tarjeta("Receptor de anuncios") {}
         }
+    }
+}
+
+/** Etiqueta de color: Sin pedir (gris), Permitido (verde) o Denegado (rojo). */
+@Composable
+private fun EtiquetaPermiso(permiso: PermisoUi) {
+    val (texto, fondo, letra) = when (permiso) {
+        PermisoUi.SinPedir -> Triple("Sin pedir", Color(0xFFE0E0E0), Color(0xFF424242))
+        PermisoUi.Concedido -> Triple("Permitido", Color(0xFFDFF3E1), Color(0xFF1B5E20))
+        PermisoUi.Denegado -> Triple("Denegado", Color(0xFFFCDCDC), Color(0xFFB71C1C))
+    }
+    Surface(color = fondo, shape = RoundedCornerShape(8.dp)) {
+        Text(
+            text = texto,
+            color = letra,
+            fontWeight = FontWeight.Bold,
+            style = MaterialTheme.typography.labelMedium,
+            modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp)
+        )
     }
 }
 
