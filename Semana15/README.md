@@ -41,6 +41,16 @@ historial. Si el usuario niega el permiso, la app sigue funcionando.
 |---|
 | ![Permiso denegado](docs/capturas/07-permiso-denegado.png) |
 
+## Fase 2 · Mejoras con IA (rama MEJORA-IA)
+
+| Mejora | Qué hace | Capas |
+|---|---|---|
+| Dos canales | Canal **Urgentes** con `IMPORTANCE_HIGH` (sale como ventana emergente) además de **Avisos**; el recordatorio usa el urgente. | Notificador + ViewModel + Repository |
+| Texto largo | Al expandir la notificación se ve el texto completo con su origen y su hora (`BigTextStyle`). | Notificador |
+| Receptor del cargador | Switch **Escuchar el cargador**: avisa «Conectado» o «Desconectado» con `ACTION_POWER_CONNECTED` y `ACTION_POWER_DISCONNECTED`. | Receiver + ViewModel + View |
+
+Los prompts usados y qué cambié de cada respuesta están en [PROMPTS.md](PROMPTS.md).
+
 ## Estructura de paquetes
 
 ```text
@@ -54,7 +64,8 @@ com.sovero.avisoscampus/
 ├── notificacion/
 │   └── Notificador.kt             canal, permiso y mostrar la notificación
 ├── receiver/
-│   └── ModoAvionReceiver.kt       escucha ACTION_AIRPLANE_MODE_CHANGED
+│   ├── ModoAvionReceiver.kt       escucha ACTION_AIRPLANE_MODE_CHANGED
+│   └── CargadorReceiver.kt        (Fase 2) escucha ACTION_POWER_CONNECTED / DISCONNECTED
 ├── viewmodel/
 │   ├── AvisosViewModel.kt         permiso, avisos, recordatorio, modo avión y errores
 │   └── AvisosViewModelFactory.kt
