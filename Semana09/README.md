@@ -48,6 +48,35 @@ app no se cierra.
 | Editar con PATCH | Pantalla **Editar título** con `@PATCH("posts/{id}")` que muestra la respuesta del servidor. | API + Repository + ViewModel + View |
 | Caché en Room | Guarda las publicaciones en Room; sin internet muestra las guardadas con el aviso «Sin internet: mostrando publicaciones guardadas». El Repository decide si usa la red o la base de datos. | Repository + Room |
 
+| Paginación | Detalle: Editar y Eliminar | Publicación eliminada |
+|---|---|---|
+| ![Paginación](docs/capturas/06-paginacion.png) | ![Detalle con acciones](docs/capturas/07-detalle-acciones.png) | ![Eliminada](docs/capturas/08-eliminada.png) |
+
+| Caché sin internet | Detalle sin internet | Búsqueda |
+|---|---|---|
+| ![Caché](docs/capturas/09-cache-sin-internet.png) | ![Detalle sin internet](docs/capturas/10-detalle-sin-internet.png) | ![Búsqueda](docs/capturas/11-busqueda.png) |
+
+| Editar con PATCH |
+|---|
+| ![Editar](docs/capturas/12-editar-patch.png) |
+
+- **Paginación:** al final de la lista está «Cargar más (20 de 100)»; arriba, el campo de
+  búsqueda.
+- **Detalle:** los botones nuevos **Editar título** y **Eliminar**.
+- **Eliminada:** el servidor respondió con el código 200 y los dos botones quedan
+  deshabilitados.
+- **Caché sin internet:** con el modo avión, la lista sale de Room con el aviso «Sin
+  internet: mostrando publicaciones guardadas».
+- **Detalle sin internet:** los comentarios no se guardan en Room, así que el detalle
+  muestra el error con Reintentar.
+- **Búsqueda:** al escribir «sunt» solo queda la publicación cuyo título lo contiene,
+  sin volver a pedir nada a internet.
+- **Editar con PATCH:** el título de la publicación 1 cambió a «Plazavea» y abajo se ve
+  la respuesta del servidor (id, usuario y título nuevo).
+- **Encabezado con interceptor:** no se ve en la pantalla; agrega
+  `Accept: application/json` a cada petición y se puede ver en Logcat con el filtro
+  `okhttp`.
+
 Los prompts usados y qué cambié de cada respuesta están en [PROMPTS.md](PROMPTS.md).
 
 ## Estructura de paquetes
