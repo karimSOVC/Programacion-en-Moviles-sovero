@@ -1,6 +1,7 @@
 package com.sovero.murocampus.data.remote
 
 import kotlinx.serialization.json.Json
+import okhttp3.Interceptor
 import okhttp3.MediaType.Companion.toMediaType
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
@@ -19,7 +20,18 @@ object RetrofitClient {
 
     // OkHttp hace la conexión; el interceptor muestra en Logcat (filtro
     // "OkHttp") cada petición y su respuesta. Solo para desarrollo.
+    // Mejora (Fase 2): un Interceptor agrega "Accept: application/json" a
+    // TODAS las peticiones, así no hay que ponerlo en cada función de PostApi.
+    // Va antes del de registro para que el encabezado se vea en Logcat.
+    private val encabezadoAccept = Interceptor { chain ->
+        val peticion = chain.request().newBuilder()
+            .header("Accept", "application/json")
+            .build()
+        chain.proceed(peticion)
+    }
+
     private val cliente = OkHttpClient.Builder()
+        .addInterceptor(encabezadoAccept)
         .addInterceptor(HttpLoggingInterceptor().apply {
             level = HttpLoggingInterceptor.Level.BODY
         })
