@@ -13,6 +13,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -33,14 +34,27 @@ fun PantallaLista(
     onAbrir: (Int) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val estado by vm.lista.collectAsStateWithLifecycle()
+    // Mejora (Fase 2): la lista ya viene filtrada por la búsqueda
+    val estado by vm.listaVisible.collectAsStateWithLifecycle()
     val filtro by vm.usuarioFiltro.collectAsStateWithLifecycle()
+    val busqueda by vm.busqueda.collectAsStateWithLifecycle()
 
     Column(modifier = modifier.fillMaxSize()) {
         // Paso 8: Todos y Usuario 1 a Usuario 10 (se desplaza de lado)
         FiltroUsuarios(
             seleccionado = filtro,
             onElegir = { vm.filtrar(it) }
+        )
+
+        // Mejora (Fase 2): campo de búsqueda por título
+        OutlinedTextField(
+            value = busqueda,
+            onValueChange = { vm.buscar(it) },
+            label = { Text("Buscar por título") },
+            singleLine = true,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 12.dp)
         )
 
         Box(modifier = Modifier.fillMaxSize()) {
@@ -55,7 +69,7 @@ fun PantallaLista(
 
                 is UiState.Exito -> if (e.datos.isEmpty()) {
                     Text(
-                        text = "Sin publicaciones",
+                        text = if (busqueda.isBlank()) "Sin publicaciones" else "Sin resultados para «$busqueda»",
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         modifier = Modifier.align(Alignment.Center)
                     )

@@ -9,8 +9,11 @@ import com.sovero.murocampus.model.Post
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
 /**
@@ -26,6 +29,28 @@ class PostsViewModel(private val repo: PostRepository) : ViewModel() {
     // ----- Filtro por usuario (paso 8): null significa Todos
     private val _usuarioFiltro = MutableStateFlow<Int?>(null)
     val usuarioFiltro: StateFlow<Int?> = _usuarioFiltro.asStateFlow()
+
+    // ----- Mejora (Fase 2): búsqueda por título
+    private val _busqueda = MutableStateFlow("")
+    val busqueda: StateFlow<String> = _busqueda.asStateFlow()
+
+    /**
+     * Lo que muestra la lista: las publicaciones ya descargadas filtradas
+     * por el texto de búsqueda. No vuelve a pedir nada a internet.
+     */
+    val listaVisible: StateFlow<UiState<List<Post>>> =
+        combine(_lista, _busqueda) { estado, texto ->
+            if (estado is UiState.Exito && texto.isNotBlank()) {
+                UiState.Exito(estado.datos.filter { it.title.contains(texto.trim(), ignoreCase = true) })
+            } else {
+                estado
+            }
+        }.stateIn(viewModelScope, SharingStarted.Eagerly, UiState.Cargando)
+
+    /** Guarda lo que se escribe en el campo de búsqueda. */
+    fun buscar(texto: String) {
+        _busqueda.value = texto
+    }
 
     // Al crearse el ViewModel ya empieza a cargar. Va después de los
     // StateFlow que usa cargar(): Kotlin los crea en orden, de arriba abajo
