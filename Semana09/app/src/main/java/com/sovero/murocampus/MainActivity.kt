@@ -4,7 +4,6 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -16,7 +15,13 @@ import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.sovero.murocampus.data.PostRepositoryRemote
+import com.sovero.murocampus.data.remote.RetrofitClient
+import com.sovero.murocampus.ui.PantallaLista
 import com.sovero.murocampus.ui.theme.MuroCampusTheme
+import com.sovero.murocampus.viewmodel.PostsViewModel
+import com.sovero.murocampus.viewmodel.PostsViewModelFactory
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -24,16 +29,20 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             MuroCampusTheme {
-                PantallaPrincipal()
+                // El ViewModel recibe el Repository; el Repository, la API
+                val vm: PostsViewModel = viewModel(
+                    factory = PostsViewModelFactory(PostRepositoryRemote(RetrofitClient.api))
+                )
+                PantallaPrincipal(vm)
             }
         }
     }
 }
 
-/** Barra azul MuroCampus; las pantallas se agregan en los pasos siguientes. */
+/** Barra azul MuroCampus y, debajo, la pantalla de la lista. */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun PantallaPrincipal() {
+fun PantallaPrincipal(vm: PostsViewModel) {
     Scaffold(
         topBar = {
             TopAppBar(
@@ -45,12 +54,11 @@ fun PantallaPrincipal() {
             )
         }
     ) { padding ->
-        Box(
+        PantallaLista(
+            vm = vm,
             modifier = Modifier
                 .fillMaxSize()
                 .padding(padding)
-        ) {
-            // TODO Paso 6: lista de publicaciones
-        }
+        )
     }
 }
