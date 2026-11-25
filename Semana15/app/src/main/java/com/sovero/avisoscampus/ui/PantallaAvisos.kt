@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -51,6 +52,7 @@ fun PantallaAvisos(vm: AvisosViewModel) {
     }
 
     val permiso by vm.permiso.collectAsState()
+    val faltan by vm.faltan.collectAsState()
 
     // Paso 2: el cuadro del permiso lo dibuja Android; aquí llega la respuesta
     val lanzador = rememberLauncherForActivityResult(
@@ -108,7 +110,20 @@ fun PantallaAvisos(vm: AvisosViewModel) {
                     Text("Mostrar aviso")
                 }
             }
-            Tarjeta("Recordatorio") {}
+            Tarjeta("Recordatorio") {
+                val corriendo = faltan != null
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    // Se deshabilita mientras corre la cuenta
+                    Button(onClick = { vm.recordarEn(10) }, enabled = !corriendo) {
+                        Text("Recordar en 10 s")
+                    }
+                    // Solo se puede cancelar mientras corre
+                    OutlinedButton(onClick = { vm.cancelarRecordatorio() }, enabled = corriendo) {
+                        Text("Cancelar")
+                    }
+                }
+                faltan?.let { Text("Faltan $it s", fontWeight = FontWeight.Bold) }
+            }
             Tarjeta("Receptor de anuncios") {}
         }
     }
