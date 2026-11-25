@@ -92,10 +92,16 @@ object Notificador {
             NotificationCompat.PRIORITY_DEFAULT
         }
 
+        // Mejora (Fase 2): texto que se ve al expandir la notificación.
+        // Cerrada muestra una sola línea; abierta, el texto completo
+        val textoLargo = "${aviso.texto}.\nOrigen: ${aviso.origen.texto} · Hora: ${aviso.hora}" +
+            "\nToca la notificación para abrir AvisosCampus y ver el historial."
+
         val notificacion = NotificationCompat.Builder(context, canal)
             .setSmallIcon(R.drawable.ic_notificacion)
             .setContentTitle(aviso.titulo)
             .setContentText(aviso.texto)
+            .setStyle(NotificationCompat.BigTextStyle().bigText(textoLargo))
             .setPriority(prioridad)
             .setContentIntent(pendiente)
             // Al tocarla, la notificación se quita del panel
